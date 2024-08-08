@@ -87,7 +87,7 @@
      <rect>
       <x>103</x>
       <y>2</y>
-      <width>631</width>
+      <width>691</width>
       <height>371</height>
      </rect>
     </property>
@@ -102,9 +102,9 @@
     <property name="geometry">
      <rect>
       <x>100</x>
-      <y>380</y>
-      <width>631</width>
-      <height>181</height>
+      <y>370</y>
+      <width>701</width>
+      <height>191</height>
      </rect>
     </property>
     <property name="text">
@@ -138,6 +138,23 @@
     </property>
     <property name="text">
      <string>保存异常信息</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>370</y>
+      <width>701</width>
+      <height>1</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">
+background-color: rgb(0, 0, 0);</string>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>
