@@ -9,6 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
 
 
 class Ui_MainWindow(object):
@@ -76,6 +77,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.pushButton.clicked.connect(self.openImage)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -93,3 +95,8 @@ class Ui_MainWindow(object):
         self.menuEdit.setTitle(_translate("MainWindow", "选项"))
         self.menu_2.setTitle(_translate("MainWindow", "帮助"))
         self.menu_3.setTitle(_translate("MainWindow", "设置"))
+
+    def openImage(self):  # 选择本地图片上传
+        imgName, imgType = QFileDialog.getOpenFileName(self.centralwidget, "打开图片", "","*.jpg;;*.png;;All Files(*)")
+        jpg = QtGui.QPixmap(imgName).scaled(self.label_2.width(),self.label_2.height())
+        self.label_2.setPixmap(jpg)
