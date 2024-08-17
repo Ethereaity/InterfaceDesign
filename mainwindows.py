@@ -97,6 +97,13 @@ class Ui_MainWindow(object):
         self.menu_3.setTitle(_translate("MainWindow", "设置"))
 
     def openImage(self):  # 选择本地图片上传
-        imgName, imgType = QFileDialog.getOpenFileName(self.centralwidget, "打开图片", "","*.jpg;;*.png;;All Files(*)")
-        jpg = QtGui.QPixmap(imgName).scaled(self.label_2.width(),self.label_2.height())
-        self.label_2.setPixmap(jpg)
+        imgName, imgType = QFileDialog.getOpenFileName(
+            self.centralwidget,
+            "打开图片",
+            "",
+            "Image Files (*.jpg *.jpeg *.png *.gif *.bmp *.tiff);;All Files (*)"
+        )
+        if imgName:  # 检查是否选择了文件
+            jpg = QtGui.QPixmap(imgName).scaled(self.label_2.width(), self.label_2.height(), QtCore.Qt.KeepAspectRatio)
+            self.label_2.setPixmap(jpg)
+
