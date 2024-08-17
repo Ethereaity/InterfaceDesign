@@ -3,21 +3,17 @@ import sys
 import mainwindows
 
 from PyQt5.QtWidgets import QApplication,QMainWindow
-if __name__ == '__main__':
-    # 只有直接运行这个脚本，才会往下执行
-    # 别的脚本文件执行，不会调用这个条件句
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QMainWindow,QTextEdit, QFileDialog, QWidget
+from PyQt5.QtCore import Qt,QSize,QDateTime
+from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout, QPushButton, QHBoxLayout
+from PyQt5.QtGui import QPixmap
 
-    # 实例化，传参
-    app = QApplication(sys.argv)
 
-    # 创建对象
-    mainWindow = QMainWindow()
-
-    # 创建ui，引用mainwindows文件中的Ui_MainWindow类
-    ui = mainwindows.Ui_MainWindow()
-    # 调用Ui_MainWindow类的setupUi，创建初始组件
-    ui.setupUi(mainWindow)
-    # 创建窗口
-    mainWindow.show()
-    # 进入程序的主循环，并通过exit函数确保主循环安全结束(该释放资源的一定要释放)
+if __name__ == "__main__":
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    window = mainwindows.MainWindow()
+    window.show()
     sys.exit(app.exec_())
