@@ -1,7 +1,8 @@
-from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtWidgets import QLabel, QPushButton, QTextEdit, QFileDialog, QHBoxLayout, QVBoxLayout, QDialog, QMainWindow
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QMainWindow,QTextEdit, QFileDialog, QWidget
+from PyQt5.QtCore import Qt,QSize,QDateTime
+from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout, QPushButton, QHBoxLayout
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
 
 class ImageViewer(QDialog):
     def __init__(self, parent=None):
@@ -31,7 +32,7 @@ class ImageViewer(QDialog):
         self.scaleFactor = 1.0
 
     def set_image(self, pixmap):
-        self.image = pixmap
+        self.image = QPixmap(pixmap)  # Ensure we have a QPixmap object
         self.scaleFactor = 1.0  # Reset scale factor when setting a new image
         self.update_image()
 
@@ -42,20 +43,28 @@ class ImageViewer(QDialog):
             self.imageLabel.adjustSize()
 
     def zoomIn(self):
-        self.scaleFactor *= 1.2
+        self.scaleFactor *= 1.1
         self.update_image()
 
     def zoomOut(self):
-        self.scaleFactor /= 1.2
-        self.update_image()
+        if self.scaleFactor > 0.5:  # Add a limit to prevent excessive zooming out
+            self.scaleFactor /= 1.1
+            self.update_image()
 
 class MainWindow(QMainWindow):
+    def add_log(self, message):
+        """
+        向日志区域添加一条新的日志信息。
+        """
+        timestamp = QDateTime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss.zzz")
+        formatted_message = f"[{timestamp}] {message}"
+        self.logArea.append(formatted_message)
     def __init__(self):
         super().__init__()
         self.setWindowTitle("主窗口")
         self.setGeometry(100, 100, 1000, 600)
 
-        self.centralwidget = QtWidgets.QWidget()
+        self.centralwidget = QWidget()
         self.setCentralWidget(self.centralwidget)
 
         # Initialize UI components
@@ -72,7 +81,7 @@ class MainWindow(QMainWindow):
         self.logArea.setReadOnly(True)
 
         # Set a fixed size for buttons
-        button_size = QtCore.QSize(150, 30)  # Adjusted button size
+        button_size = QSize(150, 30)  # Adjusted button size
         for button in [self.pushButton, self.pushButton_4, self.pushButton_5, self.pushButton_6, self.pushButton_2, self.pushButton_3]:
             button.setFixedSize(button_size)
 
@@ -101,14 +110,19 @@ class MainWindow(QMainWindow):
         self.pushButton_2.clicked.connect(self.showOriginalImage)
 
     def openImage(self):
-        imgName, _ = QFileDialog.getOpenFileName(self, "打开图片", "", "*.jpg;;*.png;;All Files(*)")
-        if imgName:
-            self.pixmap = QPixmap(imgName)
-            label_size = self.label_2.size()
-            # Adjust image size for better fit
-            scaled_pixmap = self.pixmap.scaled(label_size.width(), label_size.height(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            self.label_2.setPixmap(scaled_pixmap)
-            self.logArea.append(f"加载了图片: {imgName}")
+        try:
+            imgName, _ = QFileDialog.getOpenFileName(self, "打开图片", "", "*.jpg;;*.png;;All Files(*)")
+            if imgName:
+                self.pixmap = QPixmap(imgName)
+                label_size = self.label_2.size()
+                # Adjust image size for better fit
+                scaled_pixmap = self.pixmap.scaled(label_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                self.label_2.setPixmap(scaled_pixmap)
+                self.add_log(f"加载了图片: {imgName}")  # 使用新的日志接口
+            else:
+                self.add_log(f"加载了图片: {imgName}")  # 使用新的日志接口
+        except Exception as e:
+            self.logArea.append(f"加载图片时出现错误: {e}")
 
     def showOriginalImage(self):
         if hasattr(self, 'pixmap'):
@@ -116,7 +130,7 @@ class MainWindow(QMainWindow):
             viewer.set_image(self.pixmap)
             viewer.exec_()
         else:
-            self.logArea.append("请先导入一张图片")
+            self.add_log("请先导入一张图片")  # 使用新的日志接口
 
 if __name__ == "__main__":
     import sys
