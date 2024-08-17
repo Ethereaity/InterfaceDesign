@@ -111,7 +111,18 @@ class MainWindow(QMainWindow):
 
     def openImage(self):
         try:
-            imgName, _ = QFileDialog.getOpenFileName(self, "打开图片", "", "*.jpg;;*.png;;All Files(*)")
+            imgName, _ = QFileDialog.getOpenFileName(
+                self,
+                "打开图片",
+                "",
+                "JPEG Files (*.jpg *.jpeg);;" +
+                "PNG Files (*.png);;" +
+                "BMP Files (*.bmp);;" +
+                "GIF Files (*.gif);;" +
+                "TIFF Files (*.tif *.tiff);;" +
+                "WebP Files (*.webp);;" +
+                "All Files (*)"
+            )
             if imgName:
                 self.pixmap = QPixmap(imgName)
                 label_size = self.label_2.size()
