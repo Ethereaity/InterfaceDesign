@@ -14,6 +14,6 @@ if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    window = mainwindows.MainWindow()
+    window = mainwindows.MyApp()
     window.show()
     sys.exit(app.exec_())

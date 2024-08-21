@@ -1,11 +1,10 @@
-from PyQt5 import QtWidgets
+import sys
+from PyQt5 import QtWidgets, uic
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QTextEdit, QFileDialog, QWidget, QApplication, QDialog, QLabel, QVBoxLayout, \
     QPushButton, QHBoxLayout, QComboBox, QLineEdit
 from PyQt5.QtCore import Qt, QSize, QDateTime, QRegularExpression
 from PyQt5.QtGui import QPixmap, QTransform
-
-
 
 class ImageViewer(QDialog):
     def __init__(self, pixmap, parent=None):
@@ -55,13 +54,13 @@ class ImageViewer(QDialog):
                 # Initial scaling: fit to window
                 scaled_pixmap = self.image.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
             else:
-                # Rotate and scale the image based on the current rotation angle and scale factor
-                transform = QTransform().rotate(self.rotationAngle)
-                rotated_pixmap = self.image.transformed(transform, Qt.SmoothTransformation)
-                scaled_pixmap = rotated_pixmap.scaled(self.imageLabel.size() * self.scaleFactor, Qt.KeepAspectRatio,
-                                                      Qt.SmoothTransformation)
+                # Scale the image based on the scale factor
+                scaled_pixmap = self.image.scaled(self.imageLabel.size() * self.scaleFactor, Qt.KeepAspectRatio,
+                                                  Qt.SmoothTransformation)
 
-            self.imageLabel.setPixmap(scaled_pixmap)
+            transform = QTransform().rotate(self.rotationAngle)
+            rotated_pixmap = scaled_pixmap.transformed(transform, Qt.SmoothTransformation)
+            self.imageLabel.setPixmap(rotated_pixmap)
             self.imageLabel.adjustSize()
 
     def zoomIn(self):
@@ -75,14 +74,33 @@ class ImageViewer(QDialog):
             self.update_image()
 
     def rotateClockwise(self):
-        """顺时针旋转90度"""
+        """顺时针旋转90°"""
         self.rotationAngle += 90
+        if self.rotationAngle >= 360:
+            self.rotationAngle -= 360
         self.update_image()
 
     def rotateCounterclockwise(self):
-        """逆时针旋转90度"""
+        """逆时针旋转90°"""
         self.rotationAngle -= 90
+        if self.rotationAngle <= -360:
+            self.rotationAngle += 360
         self.update_image()
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.dragging = True
+            self.lastMousePosition = event.pos()
+
+    def mouseMoveEvent(self, event):
+        if self.dragging:
+            delta = event.pos() - self.lastMousePosition
+            self.imageLabel.move(self.imageLabel.pos() + delta)
+            self.lastMousePosition = event.pos()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.dragging = False
 
     def keyPressEvent(self, event):
         if event.key() in (Qt.Key_Plus, Qt.Key_Equal):
@@ -96,66 +114,14 @@ class ImageViewer(QDialog):
                 self.showNormal()
             else:
                 self.showFullScreen()
-
-
-class MainWindow(QMainWindow):
+class MyApp(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("线束分析工具")
-        self.setGeometry(100, 100, 1200, 800)
-
-        self.centralwidget = QWidget()
-        self.setCentralWidget(self.centralwidget)
-
-        # Initialize UI components
-        self.label = QLabel("线束分析工具")
-        self.pushButton = QPushButton("导入图片")
-        self.viewSelector = QComboBox()  # 用于选择视图
-        self.viewSelector.addItems(["原图", "元件检测效果", "结构检测效果", "轮廓检测效果", "缺陷检测效果"])
-        self.searchBar = QLineEdit()  # 搜索栏
-        self.searchBar.setPlaceholderText("搜索日志...")
-        self.pushButton_2 = QPushButton("展示选定视图")
-        self.pushButton_3 = QPushButton("保存异常信息")
-        self.logArea = QTextEdit()
-        self.logArea.setReadOnly(True)
-
-        # Set a fixed size for buttons
-        button_size = QSize(150, 30)
-        for button in [self.pushButton, self.pushButton_2, self.pushButton_3]:
-            button.setFixedSize(button_size)
-
-        # Create layouts
-        self.mainLayout = QHBoxLayout()
-        self.leftLayout = QVBoxLayout()
-        self.rightLayout = QVBoxLayout()
-
-        # Adding widgets to right layout
-        self.rightLayout.addWidget(self.searchBar)
-        self.rightLayout.addWidget(self.logArea)
-
-        # Set layout for central widget
-        self.centralLayout = QHBoxLayout()
-        self.centralLayout.setSpacing(10)  # Adjust spacing for better aesthetics
-        self.centralLayout.addLayout(self.leftLayout)
-        self.centralLayout.addLayout(self.rightLayout)
-        self.centralwidget.setLayout(self.centralLayout)
-
-        # Add components to left layout
-        self.leftLayout.addWidget(self.label)
-        self.leftLayout.addWidget(self.pushButton)
-        self.leftLayout.addWidget(self.viewSelector)
-        self.leftLayout.addWidget(self.pushButton_2)
-        self.leftLayout.addWidget(self.pushButton_3)
-
-        # Connect buttons to slots
+        uic.loadUi('mainwindows.ui', self)
+        # 槽函数在此添加
         self.pushButton.clicked.connect(self.openImage)
         self.pushButton_2.clicked.connect(self.showSelectedView)
         self.searchBar.textChanged.connect(self.searchLog)
-
-        self.setWindowFlags(
-            Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint
-        )
-        self.setStyleSheet("QMainWindow {background-color: white;}")
 
     def openImage(self):
         try:
@@ -222,14 +188,4 @@ class MainWindow(QMainWindow):
             cursor.setPosition(match.capturedStart())
             cursor.movePosition(cursor.Right, cursor.KeepAnchor, len(pattern))
             cursor.mergeCharFormat(format)
-
-
-if __name__ == "__main__":
-    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
-    import sys
-
-    app = QApplication(sys.argv)
-    mainWindow = MainWindow()
-    mainWindow.show()
-    sys.exit(app.exec_())
 
