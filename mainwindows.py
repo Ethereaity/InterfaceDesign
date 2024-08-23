@@ -1,4 +1,5 @@
 import sys
+import logo
 from PyQt5 import QtWidgets, uic
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QTextEdit, QFileDialog, QWidget, QApplication, QDialog, QLabel, QVBoxLayout, \
