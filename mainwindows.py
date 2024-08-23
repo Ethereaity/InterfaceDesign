@@ -139,20 +139,20 @@ class MyApp(QtWidgets.QMainWindow):
             )
             if imgName:
                 self.pixmap = QPixmap(imgName)
-                self.display_scaled_image(self.pixmap, self.label)
+                self.display_scaled_image(self.pixmap, self.label_2)
                 self.add_log(f"加载了图片: {imgName}")
             else:
                 self.add_log(f"未选择图片")
         except Exception as e:
             self.logArea.append(f"加载图片时出现错误: {e}")
 
-    def display_scaled_image(self, pixmap, label):
+    def display_scaled_image(self, pixmap, label_2):
         """等比例缩放图片，并显示在指定的QLabel上"""
-        label_size = label.size()
+        label_size = label_2.size()
         # Display the image as large and clear as possible, preserving the aspect ratio
         scaled_pixmap = pixmap.scaled(label_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        label.setPixmap(scaled_pixmap)
-        label.setAlignment(Qt.AlignCenter)
+        label_2.setPixmap(scaled_pixmap)
+        label_2.setAlignment(Qt.AlignCenter)
 
     def showSelectedView(self):
         if hasattr(self, 'pixmap'):
