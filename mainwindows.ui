@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1187</width>
-    <height>800</height>
+    <width>1100</width>
+    <height>750</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>线束分析工具</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="centralLayout" stretch="1,5">
+   <layout class="QHBoxLayout" name="centralLayout" stretch="1,0,5">
     <property name="spacing">
      <number>10</number>
     </property>
@@ -28,11 +28,15 @@
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>100</height>
+          <height>114</height>
          </size>
         </property>
+        <property name="styleSheet">
+         <string notr="true">image: url(:/logo图标/logo图标.png);
+background-color: rgb(255, 255, 255);</string>
+        </property>
         <property name="text">
-         <string>线束分析工具</string>
+         <string/>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -43,7 +47,7 @@
        <widget class="QPushButton" name="pushButton">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>46</width>
           <height>80</height>
          </size>
         </property>
@@ -52,6 +56,38 @@
           <width>16777215</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>-1</pointsize>
+          <weight>75</weight>
+          <italic>false</italic>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+{
+	
+	background-color: rgb(255, 255, 255);
+	border-style: outset;
+	border-width: 2px;
+	border-radius:30px;
+	border-color: rgb(0, 0, 0);
+	font: bold 16px;
+	min-width:2em;
+	padding: 5px;
+}
+QPushButton:pressed
+{
+	background-color: rgb(177, 177, 177);
+	border-style: inset;
+}
+QPushButton:!enabled
+{
+	background-color: rgb(100, 100, 100);
+	border-style: inset;
+}</string>
         </property>
         <property name="text">
          <string>导入图片</string>
@@ -62,7 +98,7 @@
        <widget class="QPushButton" name="pushButton_4">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>46</width>
           <height>80</height>
          </size>
         </property>
@@ -71,6 +107,38 @@
           <width>16777215</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>-1</pointsize>
+          <weight>75</weight>
+          <italic>false</italic>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+{
+	
+	background-color: rgb(255, 255, 255);
+	border-style: outset;
+	border-width: 2px;
+	border-radius:30px;
+	border-color: rgb(0, 0, 0);
+	font: bold 16px;
+	min-width:2em;
+	padding: 5px;
+}
+QPushButton:pressed
+{
+	background-color: rgb(177, 177, 177);
+	border-style: inset;
+}
+QPushButton:!enabled
+{
+	background-color: rgb(100, 100, 100);
+	border-style: inset;
+}</string>
         </property>
         <property name="text">
          <string>元件检测效果</string>
@@ -81,7 +149,7 @@
        <widget class="QPushButton" name="pushButton_5">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>46</width>
           <height>80</height>
          </size>
         </property>
@@ -90,6 +158,38 @@
           <width>16777215</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>-1</pointsize>
+          <weight>75</weight>
+          <italic>false</italic>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+{
+	
+	background-color: rgb(255, 255, 255);
+	border-style: outset;
+	border-width: 2px;
+	border-radius:30px;
+	border-color: rgb(0, 0, 0);
+	font: bold 16px;
+	min-width:2em;
+	padding: 5px;
+}
+QPushButton:pressed
+{
+	background-color: rgb(177, 177, 177);
+	border-style: inset;
+}
+QPushButton:!enabled
+{
+	background-color: rgb(100, 100, 100);
+	border-style: inset;
+}</string>
         </property>
         <property name="text">
          <string>结构检测效果</string>
@@ -100,7 +200,7 @@
        <widget class="QPushButton" name="pushButton_6">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>46</width>
           <height>80</height>
          </size>
         </property>
@@ -109,6 +209,38 @@
           <width>16777215</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>-1</pointsize>
+          <weight>75</weight>
+          <italic>false</italic>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+{
+	
+	background-color: rgb(255, 255, 255);
+	border-style: outset;
+	border-width: 2px;
+	border-radius:30px;
+	border-color: rgb(0, 0, 0);
+	font: bold 16px;
+	min-width:2em;
+	padding: 5px;
+}
+QPushButton:pressed
+{
+	background-color: rgb(177, 177, 177);
+	border-style: inset;
+}
+QPushButton:!enabled
+{
+	background-color: rgb(100, 100, 100);
+	border-style: inset;
+}</string>
         </property>
         <property name="text">
          <string>轮廓检测效果</string>
@@ -119,7 +251,7 @@
        <widget class="QPushButton" name="pushButton_2">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>46</width>
           <height>80</height>
          </size>
         </property>
@@ -128,6 +260,38 @@
           <width>16777215</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>-1</pointsize>
+          <weight>75</weight>
+          <italic>false</italic>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+{
+	
+	background-color: rgb(255, 255, 255);
+	border-style: outset;
+	border-width: 2px;
+	border-radius:30px;
+	border-color: rgb(0, 0, 0);
+	font: bold 16px;
+	min-width:2em;
+	padding: 5px;
+}
+QPushButton:pressed
+{
+	background-color: rgb(177, 177, 177);
+	border-style: inset;
+}
+QPushButton:!enabled
+{
+	background-color: rgb(100, 100, 100);
+	border-style: inset;
+}</string>
         </property>
         <property name="text">
          <string>展示原图</string>
@@ -138,7 +302,7 @@
        <widget class="QPushButton" name="pushButton_3">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>46</width>
           <height>80</height>
          </size>
         </property>
@@ -148,12 +312,57 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>-1</pointsize>
+          <weight>75</weight>
+          <italic>false</italic>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+{
+	
+	background-color: rgb(255, 255, 255);
+	border-style: outset;
+	border-width: 2px;
+	border-radius:30px;
+	border-color: rgb(0, 0, 0);
+	font: bold 16px;
+	min-width:2em;
+	padding: 5px;
+}
+QPushButton:pressed
+{
+	background-color: rgb(177, 177, 177);
+	border-style: inset;
+}
+QPushButton:!enabled
+{
+	background-color: rgb(100, 100, 100);
+	border-style: inset;
+}</string>
+        </property>
         <property name="text">
          <string>保存异常信息</string>
         </property>
        </widget>
       </item>
      </layout>
+    </item>
+    <item>
+     <widget class="QFrame" name="frame_2">
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::VLine</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
+     </widget>
     </item>
     <item>
      <layout class="QVBoxLayout" name="rightLayout" stretch="6,0,1,0">
@@ -200,13 +409,15 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1187</width>
+     <width>1100</width>
      <height>22</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <resources/>
+ <resources>
+  <include location="logo.qrc"/>
+ </resources>
  <connections/>
 </ui>
