@@ -1,9 +1,11 @@
-from PyQt5 import QtWidgets
+import sys
+import logo
+from PyQt5 import QtWidgets, uic
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QTextEdit, QFileDialog, QWidget, QApplication, QDialog, QLabel, QVBoxLayout, \
     QPushButton, QHBoxLayout, QComboBox, QLineEdit
 from PyQt5.QtCore import Qt, QSize, QDateTime, QRegularExpression
-from PyQt5.QtGui import QPixmap, QTransform
+from PyQt5.QtGui import QPixmap, QTransform,QIcon
 
 class ImageViewer(QDialog):
     def __init__(self, pixmap, parent=None):
@@ -113,65 +115,16 @@ class ImageViewer(QDialog):
                 self.showNormal()
             else:
                 self.showFullScreen()
-
-class MainWindow(QMainWindow):
+class MyApp(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("线束分析工具")
-        self.setGeometry(100, 100, 1200, 800)
-
-        self.centralwidget = QWidget()
-        self.setCentralWidget(self.centralwidget)
-
-        # Initialize UI components
-        self.label = QLabel("线束分析工具")
-        self.pushButton = QPushButton("导入图片")
-        self.viewSelector = QComboBox()  # 用于选择视图
-        self.viewSelector.addItems(["原图", "元件检测效果", "结构检测效果", "轮廓检测效果", "缺陷检测效果"])
-        self.searchBar = QLineEdit()  # 搜索栏
-        self.searchBar.setPlaceholderText("搜索日志...")
-        self.pushButton_2 = QPushButton("展示选定视图")
-        self.pushButton_3 = QPushButton("保存异常信息")
-        self.logArea = QTextEdit()
-        self.logArea.setReadOnly(True)
-
-        # Set a fixed size for buttons
-        button_size = QSize(150, 30)
-        for button in [self.pushButton, self.pushButton_2, self.pushButton_3]:
-            button.setFixedSize(button_size)
-
-        # Create layouts
-        self.mainLayout = QHBoxLayout()
-        self.leftLayout = QVBoxLayout()
-        self.rightLayout = QVBoxLayout()
-
-        # Adding widgets to right layout
-        self.rightLayout.addWidget(self.searchBar)
-        self.rightLayout.addWidget(self.logArea)
-
-        # Set layout for central widget
-        self.centralLayout = QHBoxLayout()
-        self.centralLayout.setSpacing(10)  # Adjust spacing for better aesthetics
-        self.centralLayout.addLayout(self.leftLayout)
-        self.centralLayout.addLayout(self.rightLayout)
-        self.centralwidget.setLayout(self.centralLayout)
-
-        # Add components to left layout
-        self.leftLayout.addWidget(self.label)
-        self.leftLayout.addWidget(self.pushButton)
-        self.leftLayout.addWidget(self.viewSelector)
-        self.leftLayout.addWidget(self.pushButton_2)
-        self.leftLayout.addWidget(self.pushButton_3)
-
-        # Connect buttons to slots
+        uic.loadUi('mainwindows.ui', self)
+        # 设置软件图标
+        self.setWindowIcon(QIcon('logo2.png'))
+        # 槽函数在此添加
         self.pushButton.clicked.connect(self.openImage)
         self.pushButton_2.clicked.connect(self.showSelectedView)
         self.searchBar.textChanged.connect(self.searchLog)
-
-        self.setWindowFlags(
-            Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint
-        )
-        self.setStyleSheet("QMainWindow {background-color: white;}")
 
     def openImage(self):
         try:
@@ -189,20 +142,20 @@ class MainWindow(QMainWindow):
             )
             if imgName:
                 self.pixmap = QPixmap(imgName)
-                self.display_scaled_image(self.pixmap, self.label)
+                self.display_scaled_image(self.pixmap, self.label_2)
                 self.add_log(f"加载了图片: {imgName}")
             else:
                 self.add_log(f"未选择图片")
         except Exception as e:
             self.logArea.append(f"加载图片时出现错误: {e}")
 
-    def display_scaled_image(self, pixmap, label):
+    def display_scaled_image(self, pixmap, label_2):
         """等比例缩放图片，并显示在指定的QLabel上"""
-        label_size = label.size()
+        label_size = label_2.size()
         # Display the image as large and clear as possible, preserving the aspect ratio
         scaled_pixmap = pixmap.scaled(label_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        label.setPixmap(scaled_pixmap)
-        label.setAlignment(Qt.AlignCenter)
+        label_2.setPixmap(scaled_pixmap)
+        label_2.setAlignment(Qt.AlignCenter)
 
     def showSelectedView(self):
         if hasattr(self, 'pixmap'):
@@ -238,14 +191,4 @@ class MainWindow(QMainWindow):
             cursor.setPosition(match.capturedStart())
             cursor.movePosition(cursor.Right, cursor.KeepAnchor, len(pattern))
             cursor.mergeCharFormat(format)
-
-
-if __name__ == "__main__":
-    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
-    import sys
-
-    app = QApplication(sys.argv)
-    mainWindow = MainWindow()
-    mainWindow.show()
-    sys.exit(app.exec_())
 
