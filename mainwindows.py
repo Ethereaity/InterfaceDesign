@@ -50,24 +50,40 @@ class MyApp(QtWidgets.QMainWindow):
         self.rotateClockwiseButton = self.findChild(QPushButton, "rotateClockwiseButton")
         self.rotateCounterclockwiseButton = self.findChild(QPushButton, "rotateCounterclockwiseButton")
 
+        # 设置按钮变色效果
         if self.zoomInButton:
             controlLayout.addWidget(self.zoomInButton)
             self.zoomInButton.clicked.connect(self.zoomIn)
+            self.zoomInButton.pressed.connect(lambda: self.change_button_color(self.zoomInButton, Qt.red))
+            self.zoomInButton.released.connect(lambda: self.change_button_color(self.zoomInButton, Qt.white))
+
         if self.zoomOutButton:
             controlLayout.addWidget(self.zoomOutButton)
             self.zoomOutButton.clicked.connect(self.zoomOut)
+            self.zoomOutButton.pressed.connect(lambda: self.change_button_color(self.zoomOutButton, Qt.red))
+            self.zoomOutButton.released.connect(lambda: self.change_button_color(self.zoomOutButton, Qt.white))
+
         if self.rotateClockwiseButton:
             controlLayout.addWidget(self.rotateClockwiseButton)
             self.rotateClockwiseButton.clicked.connect(self.rotateClockwise)
+            self.rotateClockwiseButton.pressed.connect(lambda: self.change_button_color(self.rotateClockwiseButton, Qt.red))
+            self.rotateClockwiseButton.released.connect(lambda: self.change_button_color(self.rotateClockwiseButton, Qt.white))
+
         if self.rotateCounterclockwiseButton:
             controlLayout.addWidget(self.rotateCounterclockwiseButton)
             self.rotateCounterclockwiseButton.clicked.connect(self.rotateCounterclockwise)
+            self.rotateCounterclockwiseButton.pressed.connect(lambda: self.change_button_color(self.rotateCounterclockwiseButton, Qt.red))
+            self.rotateCounterclockwiseButton.released.connect(lambda: self.change_button_color(self.rotateCounterclockwiseButton, Qt.white))
 
         # 将控制按钮布局添加到主布局中
         mainLayout.addLayout(controlLayout)
 
         # 设置主布局
         self.centralWidget().setLayout(mainLayout)
+
+    def change_button_color(self, button, color):
+        """改变按钮的背景色"""
+        button.setStyleSheet(f"background-color: {color.name()};")
 
     def openImage(self):
         try:
@@ -154,4 +170,3 @@ class MyApp(QtWidgets.QMainWindow):
                 cursor = document.find(regex, cursor)
                 if not cursor.isNull():
                     cursor.mergeCharFormat(highlight_format)
-
