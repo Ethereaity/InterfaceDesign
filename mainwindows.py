@@ -1,130 +1,73 @@
 import sys
-import logo
 from PyQt5 import QtWidgets, uic
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QTextEdit, QFileDialog, QWidget, QApplication, QDialog, QLabel, QVBoxLayout, \
-    QPushButton, QHBoxLayout, QComboBox, QLineEdit
-from PyQt5.QtCore import Qt, QSize, QDateTime, QRegularExpression
-from PyQt5.QtGui import QPixmap, QTransform,QIcon
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QScrollArea, QWidget, QLineEdit, QTextEdit
+from PyQt5.QtCore import Qt, QDateTime, QRegularExpression
+from PyQt5.QtGui import QPixmap, QTransform, QTextCharFormat, QTextCursor
 
-class ImageViewer(QDialog):
-    def __init__(self, pixmap, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("图片查看器")
-        self.setGeometry(100, 100, 800, 600)
-        self.setLayout(QVBoxLayout())
-
-        # Initialize rotation angle
-        self.rotationAngle = 0
-
-        # Create a label for displaying the image
-        self.imageLabel = QLabel(self)
-        self.imageLabel.setAlignment(Qt.AlignCenter)
-        self.layout().addWidget(self.imageLabel)
-
-        # Create buttons for zooming and rotating
-        self.zoomInButton = QPushButton("+", self)
-        self.zoomOutButton = QPushButton("-", self)
-        self.rotateClockwiseButton = QPushButton("顺时针旋转", self)
-        self.rotateCounterclockwiseButton = QPushButton("逆时针旋转", self)
-
-        self.zoomInButton.clicked.connect(self.zoomIn)
-        self.zoomOutButton.clicked.connect(self.zoomOut)
-        self.rotateClockwiseButton.clicked.connect(self.rotateClockwise)
-        self.rotateCounterclockwiseButton.clicked.connect(self.rotateCounterclockwise)
-
-        # Add buttons to layout
-        buttonLayout = QHBoxLayout()
-        buttonLayout.addWidget(self.zoomInButton)
-        buttonLayout.addWidget(self.zoomOutButton)
-        buttonLayout.addWidget(self.rotateClockwiseButton)
-        buttonLayout.addWidget(self.rotateCounterclockwiseButton)
-        self.layout().addLayout(buttonLayout)
-
-        self.image = pixmap
-        self.scaleFactor = 1.0
-        # Enable minimize, maximize, and close buttons
-        self.setWindowFlags(
-            self.windowFlags() | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
-
-        self.update_image(init=True)  # 初始化时直接显示图片
-
-    def update_image(self, init=False):
-        if self.image:
-            if init:
-                # Initial scaling: fit to window
-                scaled_pixmap = self.image.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            else:
-                # Scale the image based on the scale factor
-                scaled_pixmap = self.image.scaled(self.imageLabel.size() * self.scaleFactor, Qt.KeepAspectRatio,
-                                                  Qt.SmoothTransformation)
-
-            transform = QTransform().rotate(self.rotationAngle)
-            rotated_pixmap = scaled_pixmap.transformed(transform, Qt.SmoothTransformation)
-            self.imageLabel.setPixmap(rotated_pixmap)
-            self.imageLabel.adjustSize()
-
-    def zoomIn(self):
-        if self.scaleFactor * 1.1 <= 4.0:  # 限制最大放大倍数
-            self.scaleFactor *= 1.1
-            self.update_image()
-
-    def zoomOut(self):
-        if self.scaleFactor > 0.5:  # Add a limit to prevent excessive zooming out
-            self.scaleFactor /= 1.1
-            self.update_image()
-
-    def rotateClockwise(self):
-        """顺时针旋转90°"""
-        self.rotationAngle += 90
-        if self.rotationAngle >= 360:
-            self.rotationAngle -= 360
-        self.update_image()
-
-    def rotateCounterclockwise(self):
-        """逆时针旋转90°"""
-        self.rotationAngle -= 90
-        if self.rotationAngle <= -360:
-            self.rotationAngle += 360
-        self.update_image()
-
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.dragging = True
-            self.lastMousePosition = event.pos()
-
-    def mouseMoveEvent(self, event):
-        if self.dragging:
-            delta = event.pos() - self.lastMousePosition
-            self.imageLabel.move(self.imageLabel.pos() + delta)
-            self.lastMousePosition = event.pos()
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.dragging = False
-
-    def keyPressEvent(self, event):
-        if event.key() in (Qt.Key_Plus, Qt.Key_Equal):
-            self.zoomIn()
-        elif event.key() == Qt.Key_Minus:
-            self.zoomOut()
-        elif event.key() == Qt.Key_Escape:
-            self.close()
-        elif event.key() == Qt.Key_F11:
-            if self.isFullScreen():
-                self.showNormal()
-            else:
-                self.showFullScreen()
 class MyApp(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('mainwindows.ui', self)
-        # 设置软件图标
-        self.setWindowIcon(QIcon('logo2.png'))
-        # 槽函数在此添加
-        self.pushButton.clicked.connect(self.openImage)
-        self.pushButton_2.clicked.connect(self.showSelectedView)
-        self.searchBar.textChanged.connect(self.searchLog)
+        # 初始化图片展示区域和控制按钮
+        self.init_image_viewer_and_controls()
+        # 槽函数初始化
+        self.init_signal_slots()
+
+    def init_image_viewer_and_controls(self):
+        # 初始化控制图片的按钮和功能
+        self.rotationAngle = 0
+        self.scaleFactor = 1.0
+
+        # 查找控件
+        self.label = self.findChild(QLabel, "label")
+        self.pushButton = self.findChild(QPushButton, "pushButton")
+        self.pushButton_3 = self.findChild(QPushButton, "pushButton_3")
+        self.pushButton_4 = self.findChild(QPushButton, "pushButton_4")
+        self.pushButton_5 = self.findChild(QPushButton, "pushButton_5")
+        self.pushButton_6 = self.findChild(QPushButton, "pushButton_6")
+        self.scrollArea_external = self.findChild(QScrollArea, "scrollArea_external")
+        self.scrollArea = self.findChild(QScrollArea, "scrollArea")
+        self.label_image = self.findChild(QLabel, "label_image")
+        self.searchBar = self.findChild(QLineEdit, "searchBar")
+        self.logArea = self.findChild(QTextEdit, "logArea")
+        self.zoomInButton = self.findChild(QPushButton, "zoomInButton")
+        self.zoomOutButton = self.findChild(QPushButton, "zoomOutButton")
+        self.rotateClockwiseButton = self.findChild(QPushButton, "rotateClockwiseButton")
+        self.rotateCounterclockwiseButton = self.findChild(QPushButton, "rotateCounterclockwiseButton")
+
+        # 设置 QLabel 居中显示
+        self.label_image.setAlignment(Qt.AlignCenter)
+
+        # 在左上角的label中显示 "logo图标.png" 的图片，并按比例缩放以适应label的大小
+        logo_pixmap = QPixmap("logo图标.png")
+
+        # 获取label的初始大小
+        label_size = self.label.size()
+
+        # 按比例缩放图片以适应label的大小，但保持图片的宽高比
+        scaled_pixmap = logo_pixmap.scaled(label_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+
+        # 将缩放后的图片设置到label中
+        self.label.setPixmap(scaled_pixmap)
+
+    def init_signal_slots(self):
+        """初始化信号槽连接"""
+        if self.pushButton:
+            self.pushButton.clicked.connect(self.openImage)
+        if self.zoomInButton:
+            self.zoomInButton.clicked.connect(self.zoomIn)
+        if self.zoomOutButton:
+            self.zoomOutButton.clicked.connect(self.zoomOut)
+        if self.rotateClockwiseButton:
+            self.rotateClockwiseButton.clicked.connect(self.rotateClockwise)
+        if self.rotateCounterclockwiseButton:
+            self.rotateCounterclockwiseButton.clicked.connect(self.rotateCounterclockwise)
+        if self.searchBar:
+            self.searchBar.textChanged.connect(self.searchLog)
+
+    def change_button_color(self, button, color):
+        """改变按钮的背景色"""
+        button.setStyleSheet(f"background-color: {color.name()};")
 
     def openImage(self):
         try:
@@ -142,53 +85,109 @@ class MyApp(QtWidgets.QMainWindow):
             )
             if imgName:
                 self.pixmap = QPixmap(imgName)
-                self.display_scaled_image(self.pixmap, self.label_2)
-                self.add_log(f"加载了图片: {imgName}")
-            else:
-                self.add_log(f"未选择图片")
+                if not self.pixmap.isNull():
+                    print("Image loaded successfully")  # 调试信息
+                    self.display_scaled_image()
+                    self.add_log(f"加载了图片: {imgName}")
+                else:
+                    print("Failed to load image")  # 调试信息
+                    self.add_log(f"未选择图片")
         except Exception as e:
-            self.logArea.append(f"加载图片时出现错误: {e}")
+            self.add_log(f"加载图片时出现错误: {e}")
 
-    def display_scaled_image(self, pixmap, label_2):
-        """等比例缩放图片，并显示在指定的QLabel上"""
-        label_size = label_2.size()
-        # Display the image as large and clear as possible, preserving the aspect ratio
-        scaled_pixmap = pixmap.scaled(label_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        label_2.setPixmap(scaled_pixmap)
-        label_2.setAlignment(Qt.AlignCenter)
+    def display_scaled_image(self):
+        """根据当前缩放比例和旋转角度显示图片"""
+        if not self.pixmap:
+            print("Error: No pixmap loaded.")
+            return
+        try:
+            # 确保 label_image 是有效的对象，并且大小合理
+            if not self.label_image or self.label_image.size().width() == 0 or self.label_image.size().height() == 0:
+                print("Error: label_image is not properly initialized or has zero size.")
+                return
 
-    def showSelectedView(self):
-        if hasattr(self, 'pixmap'):
-            viewer = ImageViewer(self.pixmap, self)
-            viewer.exec_()
-        else:
-            self.add_log("请先导入一张图片")
+            # 重新计算每次缩放的比例，确保缩放比例是基于初始图片大小的
+            transform = QTransform().rotate(self.rotationAngle)
+            rotated_pixmap = self.pixmap.transformed(transform, Qt.SmoothTransformation)
+            print(f"Pixmap transformed with rotation angle: {self.rotationAngle}")
 
+            # 使用新的缩放比例调整图片大小
+            label_size = self.label_image.size()  # 获取 label 的当前大小
+            scaled_pixmap = rotated_pixmap.scaled(label_size * self.scaleFactor, Qt.KeepAspectRatio,
+                                                  Qt.SmoothTransformation)
+            print(f"Pixmap scaled with scale factor: {self.scaleFactor}")
+
+            self.label_image.setPixmap(scaled_pixmap)
+            self.label_image.adjustSize()
+            print(f"Image displayed with scale: {self.scaleFactor}, rotation: {self.rotationAngle}")
+        except Exception as e:
+            print(f"Error displaying image: {e}")
+            self.add_log(f"Error displaying image: {e}")
+
+    def zoomIn(self):
+        try:
+            if self.scaleFactor <= 3.9:  # 限制最大放大倍数，并预留一定余地防止溢出
+                self.scaleFactor *= 1.1
+                self.display_scaled_image()
+        except Exception as e:
+            self.add_log(f"Zoom In 出现错误: {e}")
+            print(f"Zoom In 出现错误: {e}")
+
+    def zoomOut(self):
+        try:
+            if self.scaleFactor > 0.5:  # 限制最小缩放倍数
+                self.scaleFactor /= 1.1
+                self.display_scaled_image()
+        except Exception as e:
+            self.add_log(f"Zoom Out 出现错误: {e}")
+            print(f"Zoom Out 出现错误: {e}")
+
+    def rotateClockwise(self):
+        """顺时针旋转90°"""
+        try:
+            self.rotationAngle += 90
+            if self.rotationAngle >= 360:
+                self.rotationAngle -= 360
+            # 每次旋转后，将缩放比例重置为1，确保图片不变形
+            self.display_scaled_image()
+        except Exception as e:
+            self.add_log(f"Rotate Clockwise 出现错误: {e}")
+            print(f"Rotate Clockwise 出现错误: {e}")
+
+    def rotateCounterclockwise(self):
+        """逆时针旋转90°"""
+        try:
+            self.rotationAngle -= 90
+            if self.rotationAngle <= -360:
+                self.rotationAngle += 360
+            # 每次旋转后，将缩放比例重置为1，确保图片不变形
+            self.display_scaled_image()
+        except Exception as e:
+            self.add_log(f"Rotate Counterclockwise 出现错误: {e}")
+            print(f"Rotate Counterclockwise 出现错误: {e}")
     def add_log(self, message):
         """向日志区域添加一条新的日志信息。"""
         timestamp = QDateTime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss.zzz")
         formatted_message = f"[{timestamp}] {message}"
         self.logArea.append(formatted_message)
-
     def searchLog(self, text):
-        cursor = self.logArea.textCursor()
-        cursor.setPosition(0)
-        format = cursor.charFormat()
-        format.setBackground(Qt.yellow)
+        """在日志区域中搜索并高亮显示文本"""
+        # 获取整个日志内容
+        document = self.logArea.document()
 
-        # 取消之前的高亮
-        self.logArea.moveCursor(cursor.Start)
-        self.logArea.setTextCursor(cursor)
-        self.logArea.setPlainText(self.logArea.toPlainText())
+        # 定义高亮格式
+        highlight_format = QTextCharFormat()
+        highlight_format.setBackground(Qt.yellow)
 
-        # 搜索新文本
-        pattern = text
-        regex = QRegularExpression(pattern)
-        match_iterator = regex.globalMatch(self.logArea.toPlainText())
-
-        while match_iterator.hasNext():
-            match = match_iterator.next()
-            cursor.setPosition(match.capturedStart())
-            cursor.movePosition(cursor.Right, cursor.KeepAnchor, len(pattern))
-            cursor.mergeCharFormat(format)
-
+        # 清除之前的高亮
+        cursor = QTextCursor(document)
+        cursor.select(QTextCursor.Document)
+        cursor.setCharFormat(QTextCharFormat())
+        # 查找匹配文本并高亮显示
+        if text:
+            regex = QRegularExpression(text)
+            cursor = QTextCursor(document)
+            while not cursor.isNull() and not cursor.atEnd():
+                cursor = document.find(regex, cursor)
+                if not cursor.isNull():
+                    cursor.mergeCharFormat(highlight_format)
