@@ -1,20 +1,20 @@
 import sys
-from PyQt5 import QtWidgets, uic
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QScrollArea, QWidget, QLineEdit, QTextEdit, QMenu, QApplication
-from PyQt5.QtCore import Qt, QDateTime, QRegularExpression, QFile
-from PyQt5.QtGui import QPixmap, QTextCharFormat, QTextCursor, QIcon
+from PyQt5 import QtWidgets, uic, QtCore, QtGui
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QTextEdit, QPushButton, QApplication
+from PyQt5.QtCore import Qt, QPropertyAnimation, QEasingCurve, QRegularExpression
+from PyQt5.QtGui import QTextCharFormat, QTextCursor
 
 class Log(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('logwindows.ui', self)
-        # 初始化图片展示区域和控制按钮
         self.init_image_viewer_and_controls()
-        # 槽函数初始化
         self.init_signal_slots()
+        # 初始化动画
+        self.init_animations()
 
     def show_log(self):
-        """显示弹出界面并加载日志内容"""
+        """显示日志内容"""
         filenames = 'log.txt'
         try:
             with open(filenames, 'r') as f:
@@ -36,24 +36,55 @@ class Log(QtWidgets.QMainWindow):
         if self.searchBar:
             self.searchBar.textChanged.connect(self.searchLog)
         if self.saveButton:
-            self.saveButton.clicked.connect(self.saveLog)
+            self.saveButton.clicked.connect(lambda: self.animate_button(self.saveButton))
+            self.saveButton.clicked.connect(self.saveLog)  # 连接保存按钮
         if self.exportButton:
-            self.exportButton.clicked.connect(self.exportLog)
+            self.exportButton.clicked.connect(lambda: self.animate_button(self.exportButton, self.exportLog))
+
+    def init_animations(self):
+        """初始化动画设置"""
+        self.animations = {}
+
+    def animate_button(self, button, callback=None):
+        """按钮点击时的缩放动画"""
+        # 如果按钮正在执行动画，则取消该动画
+        if button in self.animations:
+            self.animations[button].stop()
+
+        # 放大动画
+        enlarge_animation = QPropertyAnimation(button, b"size")
+        enlarge_animation.setDuration(50)
+        enlarge_animation.setStartValue(button.size())
+        enlarge_animation.setEndValue(button.size() + QtCore.QSize(3, 3))
+        enlarge_animation.setEasingCurve(QEasingCurve.OutBounce)
+
+        # 缩小动画
+        shrink_animation = QPropertyAnimation(button, b"size")
+        shrink_animation.setDuration(50)
+        shrink_animation.setStartValue(button.size() + QtCore.QSize(3, 3))
+        shrink_animation.setEndValue(button.size())
+        shrink_animation.setEasingCurve(QEasingCurve.InBounce)
+
+        # 动画链
+        enlarge_animation.finished.connect(lambda: shrink_animation.start())
+
+        # 缩小动画结束后调用回调函数
+        if callback:
+            shrink_animation.finished.connect(callback)
+
+        # 启动放大动画
+        self.animations[button] = enlarge_animation
+        enlarge_animation.start()
 
     def searchLog(self, text):
         """在日志区域中搜索并高亮显示文本"""
-        # 获取整个日志内容
         document = self.logArea.document()
-
-        # 定义高亮格式
         highlight_format = QTextCharFormat()
         highlight_format.setBackground(Qt.yellow)
-
-        # 清除之前的高亮
         cursor = QTextCursor(document)
         cursor.select(QTextCursor.Document)
         cursor.setCharFormat(QTextCharFormat())
-        # 查找匹配文本并高亮显示
+
         if text:
             regex = QRegularExpression(text)
             cursor = QTextCursor(document)
@@ -86,5 +117,7 @@ class Log(QtWidgets.QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     log_window = Log()
-    log_window.show_log()
+    log_window.show()
     sys.exit(app.exec_())
+
+

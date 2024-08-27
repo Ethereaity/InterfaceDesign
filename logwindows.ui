@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>796</width>
-    <height>580</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,10 +15,21 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayoutMain">
+    <property name="spacing">
+     <number>7</number>
+    </property>
     <item>
      <widget class="QLineEdit" name="searchBar">
       <property name="styleSheet">
-       <string notr="true">font: 10pt &quot;微软雅黑&quot;;</string>
+       <string notr="true">
+        QLineEdit {
+          font: 10pt "PingFang SC";
+          border-radius: 15px;
+          border: 1px solid #E0E0E0;
+          padding: 8px 15px;
+          background-color: #F7F7F7;
+        }
+       </string>
       </property>
       <property name="placeholderText">
        <string>搜索日志...</string>
@@ -28,16 +39,51 @@
     <item>
      <widget class="QTextEdit" name="logArea">
       <property name="styleSheet">
-       <string notr="true">font: 12pt &quot;微软雅黑&quot;;</string>
+       <string notr="true">
+        QTextEdit {
+          font: 12pt "PingFang SC";
+          border: 1px solid #E0E0E0;
+          border-radius: 15px;
+          background-color: #FFFFFF;
+          padding: 12px;
+        }
+       </string>
       </property>
      </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayoutButtons">
+      <property name="spacing">
+       <number>7</number>
+      </property>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Expanding</enum>
+        </property>
+       </spacer>
+      </item>
       <item>
        <widget class="QPushButton" name="saveButton">
         <property name="text">
          <string>保存日志</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">
+          QPushButton {
+            font: 10pt "PingFang SC";
+            color: white;
+            background-color: #A5A5A5;
+            border-radius: 15px;
+            padding: 10px 25px;
+          }
+          QPushButton:hover {
+            background-color: #8E8E8E;
+          }
+         </string>
         </property>
        </widget>
       </item>
@@ -46,9 +92,43 @@
         <property name="text">
          <string>导出日志</string>
         </property>
+        <property name="styleSheet">
+         <string notr="true">
+          QPushButton {
+            font: 10pt "PingFang SC";
+            color: white;
+            background-color: #A5A5A5;
+            border-radius: 15px;
+            padding: 10px 25px;
+          }
+          QPushButton:hover {
+            background-color: #8E8E8E;
+          }
+         </string>
+        </property>
        </widget>
       </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Expanding</enum>
+        </property>
+       </spacer>
+      </item>
      </layout>
+    </item>
+    <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Expanding</enum>
+      </property>
+     </spacer>
     </item>
    </layout>
   </widget>
@@ -57,55 +137,21 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>796</width>
+     <width>800</width>
      <height>22</height>
     </rect>
    </property>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
-  <action name="Import">
-   <property name="text">
-    <string>导入</string>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="styleSheet">
+    <string notr="true">
+     QStatusBar {
+       background-color: #F7F7F7;
+       font: 10pt "PingFang SC";
+     }
+    </string>
    </property>
-   <property name="toolTip">
-    <string>导入</string>
-   </property>
-  </action>
-  <action name="Export">
-   <property name="text">
-    <string>导出</string>
-   </property>
-   <property name="toolTip">
-    <string>导出</string>
-   </property>
-  </action>
-  <action name="Save">
-   <property name="text">
-    <string>保存</string>
-   </property>
-   <property name="toolTip">
-    <string>保存</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
-   </property>
-  </action>
-  <action name="log">
-   <property name="text">
-    <string>查看</string>
-   </property>
-   <property name="toolTip">
-    <string>查看</string>
-   </property>
-  </action>
-  <action name="log_clear">
-   <property name="text">
-    <string>清空</string>
-   </property>
-   <property name="toolTip">
-    <string>清空</string>
-   </property>
-  </action>
+  </widget>
  </widget>
  <resources/>
  <connections/>
