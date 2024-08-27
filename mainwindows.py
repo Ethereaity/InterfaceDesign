@@ -2,9 +2,10 @@ import sys
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtGui import QPixmap, QTransform, QTextCharFormat, QTextCursor
 from PyQt5.QtWidgets import QMainWindow, QTextEdit, QFileDialog, QWidget, QApplication, QDialog, QLabel, QVBoxLayout, \
-    QPushButton, QHBoxLayout, QComboBox, QLineEdit,QScrollArea
+    QPushButton, QHBoxLayout, QComboBox, QLineEdit,QScrollArea,QMessageBox
 from PyQt5.QtCore import Qt, QSize, QDateTime, QRegularExpression
 from PyQt5.QtGui import QPixmap, QTransform,QIcon
+from PyQt5.QtCore import pyqtSignal
 import sys
 import json
 sys.path.insert(1,sys.path[0]+r'\yolov5')
@@ -17,6 +18,7 @@ import copy
 from Inflation_search import calculate_length,convert_to_images,re_ploy
 
 class MyApp(QtWidgets.QMainWindow):
+    showlogSignal = pyqtSignal()
     def __init__(self):
         super().__init__()
         uic.loadUi('mainwindows.ui', self)
@@ -87,6 +89,19 @@ class MyApp(QtWidgets.QMainWindow):
         self.pushButton_4.clicked.connect(self.show_yolo)
         self.pushButton_5.clicked.connect(self.show_maskrcnn)
         self.pushButton_6.clicked.connect(self.show_pointrend)
+        # 菜单栏槽函数
+        self.Import.triggered.connect(self.openImage)
+        self.log.triggered.connect(self.show_log)
+        self.log_clear.triggered.connect(self.clear_log)
+
+    def show_log(self):
+        # 发射信号给弹出界面
+        self.showlogSignal.emit()
+
+    def clear_log(self):
+        with open(r'log.txt', 'a+') as file:
+            file.truncate(0)
+        QMessageBox.information(self, "提示", "已清空日志")
 
     def change_button_color(self, button, color):
         """改变按钮的背景色"""
