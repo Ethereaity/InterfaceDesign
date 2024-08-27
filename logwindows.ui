@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LogWindow</class>
+ <widget class="QMainWindow" name="LogWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>796</width>
+    <height>580</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>查看日志</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayoutMain">
+    <item>
+     <widget class="QLineEdit" name="searchBar">
+      <property name="styleSheet">
+       <string notr="true">font: 10pt &quot;微软雅黑&quot;;</string>
+      </property>
+      <property name="placeholderText">
+       <string>搜索日志...</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTextEdit" name="logArea">
+      <property name="styleSheet">
+       <string notr="true">font: 12pt &quot;微软雅黑&quot;;</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayoutButtons">
+      <item>
+       <widget class="QPushButton" name="saveButton">
+        <property name="text">
+         <string>保存日志</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="exportButton">
+        <property name="text">
+         <string>导出日志</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>796</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="Import">
+   <property name="text">
+    <string>导入</string>
+   </property>
+   <property name="toolTip">
+    <string>导入</string>
+   </property>
+  </action>
+  <action name="Export">
+   <property name="text">
+    <string>导出</string>
+   </property>
+   <property name="toolTip">
+    <string>导出</string>
+   </property>
+  </action>
+  <action name="Save">
+   <property name="text">
+    <string>保存</string>
+   </property>
+   <property name="toolTip">
+    <string>保存</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="log">
+   <property name="text">
+    <string>查看</string>
+   </property>
+   <property name="toolTip">
+    <string>查看</string>
+   </property>
+  </action>
+  <action name="log_clear">
+   <property name="text">
+    <string>清空</string>
+   </property>
+   <property name="toolTip">
+    <string>清空</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
