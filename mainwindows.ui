@@ -989,6 +989,7 @@ background-color: rgb(255, 255, 255);</string>
     <addaction name="Import"/>
     <addaction name="Export"/>
     <addaction name="Save"/>
+    <addaction name="exception"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -1042,6 +1043,12 @@ background-color: rgb(255, 255, 255);</string>
    </property>
    <property name="toolTip">
     <string>清空</string>
+   </property>
+  </action>
+<<<<<<< HEAD
+  <action name="exception">
+   <property name="text">
+    <string>异常</string>
    </property>
   </action>
  </widget>
