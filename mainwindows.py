@@ -86,7 +86,6 @@ class MyApp(QtWidgets.QMainWindow):
             self.searchBar.textChanged.connect(self.searchLog)
 
         self.pushButton.clicked.connect(self.openImage)
-        self.searchBar.textChanged.connect(self.searchLog)
         self.pushButton_4.clicked.connect(self.show_yolo)
         self.pushButton_5.clicked.connect(self.show_maskrcnn)
         self.pushButton_6.clicked.connect(self.show_pointrend)

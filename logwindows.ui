@@ -73,7 +73,7 @@
          <string notr="true">
         QLineEdit {
           font: 10pt &quot;PingFang SC&quot;;
-          border-radius: 20px;
+          border-radius: 18px;
           border: 1px solid #E0E0E0;
           padding: 8px 15px;
           background-color: #F7F7F7;
@@ -337,7 +337,7 @@
             font: 10pt &quot;PingFang SC&quot;;
             color: white;
             background-color: #81D8D0;
-            border-radius: 20px;
+            border-radius: 18px;
             padding: 10px 25px;
           }
           QPushButton:hover {
@@ -386,7 +386,7 @@
             font: 10pt &quot;PingFang SC&quot;;
             color: white;
             background-color: #81D8D0;
-            border-radius: 20px;
+            border-radius: 18px;
             padding: 10px 25px;
           }
           QPushButton:hover {
