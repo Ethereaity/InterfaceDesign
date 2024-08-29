@@ -1045,6 +1045,7 @@ background-color: rgb(255, 255, 255);</string>
     <string>清空</string>
    </property>
   </action>
+<<<<<<< HEAD
   <action name="exception">
    <property name="text">
     <string>异常</string>

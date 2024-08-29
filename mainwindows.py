@@ -76,6 +76,7 @@ class MyApp(QtWidgets.QMainWindow):
         with open('exception.txt','w',encoding='utf-8') as f:
             f.write("异常：\n")
 
+
     def init_signal_slots(self):
         """初始化信号槽连接"""
         if self.pushButton:
@@ -94,6 +95,8 @@ class MyApp(QtWidgets.QMainWindow):
         #self.pushButton.clicked.connect(self.openImage)
         self.searchBar.textChanged.connect(self.searchLog)
         self.pushButton_3.clicked.connect(self.save_e)
+        self.pushButton.clicked.connect(self.openImage)
+
         self.pushButton_4.clicked.connect(self.show_yolo)
         self.pushButton_5.clicked.connect(self.show_maskrcnn)
         self.pushButton_6.clicked.connect(self.show_pointrend)
@@ -110,7 +113,6 @@ class MyApp(QtWidgets.QMainWindow):
     def show_e(self):
         self.ewindow2 = ShowE
         self.ewindow2.show()
-
 
     def show_log(self):
         # 发射信号给弹出界面
@@ -310,3 +312,9 @@ class MyApp(QtWidgets.QMainWindow):
                                                   Qt.SmoothTransformation)
             self.label_image.setPixmap(scaled_pixmap)
             self.label_image.adjustSize()
+
+
+
+
+
+
