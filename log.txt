@@ -1,0 +1,20 @@
+[2024-08-29 20:24:00.171] 加载了图片: C:/Users/86151/Desktop/5.3/IMG_1774.JPG
+[2024-08-29 20:24:00.172] 加载图片时出现错误: name 'yolo_detect' is not defined
+[2024-08-29 20:24:02.050] 未选择图片
+[2024-08-29 20:34:10.971] 加载了图片: C:/Users/86151/Desktop/5.3/IMG_1774.JPG
+[2024-08-29 20:34:10.972] 加载图片时出现错误: name 'yolo_detect' is not defined
+[2024-08-29 20:34:12.369] 加载了图片: C:/Users/86151/Desktop/5.3/IMG_1775.JPG
+[2024-08-29 20:34:12.369] 加载图片时出现错误: name 'yolo_detect' is not defined
+[2024-08-29 20:35:18.517] 加载了图片: C:/Users/86151/Desktop/5.4/IMG_1780.JPG
+[2024-08-29 20:35:18.518] 加载图片时出现错误: name 'yolo_detect' is not defined
+[2024-08-29 20:35:20.097] 加载了图片: C:/Users/86151/Desktop/5.4/IMG_1781.JPG
+[2024-08-29 20:35:20.100] 加载图片时出现错误: name 'yolo_detect' is not defined
+[2024-08-29 20:46:41.726] 加载了图片: C:/Users/86151/Desktop/5.3/IMG_1775.JPG
+[2024-08-29 20:46:41.727] 加载图片时出现错误: name 'yolo_detect' is not defined
+[2024-08-29 20:46:43.040] 加载了图片: C:/Users/86151/Desktop/5.3/IMG_1776.JPG
+[2024-08-29 20:46:43.041] 加载图片时出现错误: name 'yolo_detect' is not defined
+[2024-08-29 20:48:17.644] 加载了图片: C:/Users/86151/Desktop/5.3/IMG_1775.JPG
+[2024-08-29 20:48:35.116] 加载了图片: C:/Users/86151/Desktop/5.3/IMG_1774.JPG
+[2024-08-29 20:48:35.118] 加载图片时出现错误: name 'yolo_detect' is not defined
+[2024-08-29 20:48:36.685] 加载了图片: C:/Users/86151/Desktop/5.3/IMG_1776.JPG
+[2024-08-29 20:48:36.686] 加载图片时出现错误: name 'yolo_detect' is not defined
