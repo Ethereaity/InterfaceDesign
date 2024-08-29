@@ -18,6 +18,9 @@ from detectron.detect import keypoint_detect
 from detectron.projects.PointRend.detect import pointrend_detect
 import copy
 from Inflation_search import calculate_length,convert_to_images,re_ploy
+from PyQt5.QtGui import QPainter, QColor, QPen, QFont
+from PyQt5.QtCore import QPoint, QRect
+from PyQt5.QtWidgets import QInputDialog
 
 class MyApp(QtWidgets.QMainWindow):
 
@@ -34,7 +37,24 @@ class MyApp(QtWidgets.QMainWindow):
         # 软件图标设置
         self.setWindowIcon(QIcon('logo2.png'))
 
+        self.annotated_label = AnnotatedLabel()
+        self.annotated_label.setAlignment(Qt.AlignCenter)
+        self.scrollArea.setWidget(self.annotated_label)
 
+    def annotate_point(self):
+        self.annotated_label.current_annotation = {"type": "point"}
+
+    def annotate_line(self):
+        self.annotated_label.current_annotation = {"type": "line", "start": None}
+
+    def annotate_text(self):
+        text, ok = QInputDialog.getText(self, '输入文本', '请输入注释文本:')
+        if ok and text:
+            self.annotated_label.add_annotation("text", position=None, text=text)
+
+    def clear_annotations(self):
+        self.annotated_label.annotations.clear()
+        self.annotated_label.update()
     def init_image_viewer_and_controls(self):
         # 初始化控制图片的按钮和功能
         self.rotationAngle = 0
@@ -56,6 +76,12 @@ class MyApp(QtWidgets.QMainWindow):
         self.zoomOutButton = self.findChild(QPushButton, "zoomOutButton")
         self.rotateClockwiseButton = self.findChild(QPushButton, "rotateClockwiseButton")
         self.rotateCounterclockwiseButton = self.findChild(QPushButton, "rotateCounterclockwiseButton")
+
+
+        self.annotatePointButton = self.findChild(QPushButton, "annotatePointButton")
+        self.annotateLineButton = self.findChild(QPushButton, "annotateLineButton")
+        self.annotateTextButton = self.findChild(QPushButton, "annotateTextButton")
+        self.annotateClearButton = self.findChild(QPushButton, "annotateClearButton")
 
         # 设置 QLabel 居中显示
         self.label_image.setAlignment(Qt.AlignCenter)
@@ -87,7 +113,16 @@ class MyApp(QtWidgets.QMainWindow):
         if self.searchBar:
             self.searchBar.textChanged.connect(self.searchLog)
 
-        self.pushButton.clicked.connect(self.openImage)
+        if self.annotatePointButton:
+            self.annotatePointButton.clicked.connect(self.annotate_point)
+        if self.annotateLineButton:
+            self.annotateLineButton.clicked.connect(self.annotate_line)
+        if self.annotateTextButton:
+            self.annotateTextButton.clicked.connect(self.annotate_text)
+        if self.annotateClearButton:
+            self.annotateClearButton.clicked.connect(self.clear_annotations)
+
+        #self.pushButton.clicked.connect(self.openImage)
         self.pushButton_4.clicked.connect(self.show_yolo)
         self.pushButton_5.clicked.connect(self.show_maskrcnn)
         self.pushButton_6.clicked.connect(self.show_pointrend)
@@ -293,8 +328,58 @@ class MyApp(QtWidgets.QMainWindow):
             self.label_image.setPixmap(scaled_pixmap)
             self.label_image.adjustSize()
 
+class AnnotatedLabel(QLabel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.annotations = []
+        self.current_annotation = None
 
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            if self.current_annotation:
+                if self.current_annotation["type"] == "line":
+                    self.current_annotation["start"] = event.pos()
+                else:
+                    self.current_annotation["pos"] = event.pos()
+            else:
+                self.current_annotation = {"type": "point", "pos": event.pos()}
+            self.annotations.append(self.current_annotation)
+            self.update()
 
+    def mouseMoveEvent(self, event):
+        if self.current_annotation and self.current_annotation["type"] == "line":
+            self.current_annotation["end"] = event.pos()
+            self.update()
+
+    def mouseReleaseEvent(self, event):
+        if self.current_annotation and self.current_annotation["type"] == "line":
+            self.current_annotation["end"] = event.pos()
+            self.current_annotation = None
+            self.update()
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        painter = QPainter(self)
+        painter.setPen(QPen(QColor(255, 0, 0), 2))
+        painter.setFont(QFont("Arial", 12))
+
+        for annotation in self.annotations:
+            if annotation["type"] == "point":
+                painter.drawEllipse(annotation["pos"], 5, 5)
+            elif annotation["type"] == "line":
+                if "start" in annotation and "end" in annotation:
+                    painter.drawLine(annotation["start"], annotation["end"])
+            elif annotation["type"] == "text":
+                painter.drawText(annotation["pos"], annotation["text"])
+
+    def add_annotation(self, annotation_type, position=None, end_position=None, text=None):
+        if annotation_type == "point":
+            self.annotations.append({"type": "point", "pos": position})
+        elif annotation_type == "line":
+            self.annotations.append({"type": "line", "start": position, "end": end_position})
+        elif annotation_type == "text":
+            self.annotations.append({"type": "text", "pos": position, "text": text})
+        self.update()
 
 
 
