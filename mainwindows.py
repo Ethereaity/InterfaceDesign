@@ -13,10 +13,10 @@ import json
 sys.path.insert(1,sys.path[0]+r'\yolov5')
 sys.path.insert(2,sys.path[0]+r'\detectron')
 sys.path.insert(3,sys.path[0]+r'\detectron\projects\PointRend')
-from yolov5.detect import yolo_detect
-from detectron.detect import keypoint_detect
-from detectron.projects.PointRend.detect import pointrend_detect
-from ewindows import SaveE,ShowE
+#模型需要将以下三行取消注释
+#from yolov5.detect import yolo_detect
+#from detectron.detect import keypoint_detect
+#from detectron.projects.PointRend.detect import pointrend_detect
 import copy
 from Inflation_search import calculate_length,convert_to_images,re_ploy
 
@@ -73,10 +73,6 @@ class MyApp(QtWidgets.QMainWindow):
         # 将缩放后的图片设置到label中
         self.label.setPixmap(scaled_pixmap)
 
-        with open('exception.txt','w',encoding='utf-8') as f:
-            f.write("异常：\n")
-
-
     def init_signal_slots(self):
         """初始化信号槽连接"""
         if self.pushButton:
@@ -92,27 +88,14 @@ class MyApp(QtWidgets.QMainWindow):
         if self.searchBar:
             self.searchBar.textChanged.connect(self.searchLog)
 
-        #self.pushButton.clicked.connect(self.openImage)
-        self.searchBar.textChanged.connect(self.searchLog)
-        self.pushButton_3.clicked.connect(self.save_e)
         self.pushButton.clicked.connect(self.openImage)
-
         self.pushButton_4.clicked.connect(self.show_yolo)
         self.pushButton_5.clicked.connect(self.show_maskrcnn)
         self.pushButton_6.clicked.connect(self.show_pointrend)
         # 菜单栏槽函数
         self.Import.triggered.connect(self.openImage)
         self.log.triggered.connect(self.show_log)
-        self.exception.triggered.connect(self.show_e)
         self.log_clear.triggered.connect(self.clear_log)
-
-    def save_e(self):
-        self.ewindow1=SaveE()
-        self.ewindow1.show()
-
-    def show_e(self):
-        self.ewindow2 = ShowE
-        self.ewindow2.show()
 
     def show_log(self):
         # 发射信号给弹出界面
@@ -224,7 +207,6 @@ class MyApp(QtWidgets.QMainWindow):
         except Exception as e:
             self.add_log(f"Rotate Counterclockwise 出现错误: {e}")
             print(f"Rotate Counterclockwise 出现错误: {e}")
-
     def add_log(self, message):
         """向日志区域添加一条新的日志信息。"""
         timestamp = QDateTime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss.zzz")
@@ -233,7 +215,6 @@ class MyApp(QtWidgets.QMainWindow):
         with open('log.txt', 'a') as file:
             file.write(formatted_message)
             file.close()
-
     def searchLog(self, text):
         """在日志区域中搜索并高亮显示文本"""
         # 获取整个日志内容
