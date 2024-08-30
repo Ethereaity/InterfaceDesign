@@ -1,25 +1,28 @@
 import sys
 import logo
-from PyQt5 import QtWidgets, uic, QtCore
-from PyQt5.QtGui import QPixmap, QTransform, QTextCharFormat, QTextCursor, QIcon
-from PyQt5.QtWidgets import QMainWindow, QTextEdit, QFileDialog, QLabel, QVBoxLayout, \
-    QPushButton, QLineEdit, QScrollArea, QMessageBox
-from PyQt5.QtCore import Qt, QSize, QDateTime, QRegularExpression, pyqtSignal
+import savelog
+from PyQt5 import QtWidgets, uic
+from PyQt5.QtGui import QPixmap, QTransform, QTextCharFormat, QTextCursor
+from PyQt5.QtWidgets import QMainWindow, QTextEdit, QFileDialog, QWidget, QApplication, QDialog, QLabel, QVBoxLayout, \
+    QPushButton, QHBoxLayout, QComboBox, QLineEdit,QScrollArea,QMessageBox
+from PyQt5.QtCore import Qt, QSize, QDateTime, QRegularExpression
+from PyQt5.QtGui import QPixmap, QTransform,QIcon
+from PyQt5.QtCore import pyqtSignal
+import sys
 import json
-
-# 导入其他需要的模块
-sys.path.insert(1, sys.path[0] + r'\yolov5')
-sys.path.insert(2, sys.path[0] + r'\detectron')
-sys.path.insert(3, sys.path[0] + r'\detectron\projects\PointRend')
-from yolov5.detect import yolo_detect
-from detectron.detect import keypoint_detect
-from detectron.projects.PointRend.detect import pointrend_detect
-from Inflation_search import calculate_length, convert_to_images, re_ploy
-
+sys.path.insert(1,sys.path[0]+r'\yolov5')
+sys.path.insert(2,sys.path[0]+r'\detectron')
+sys.path.insert(3,sys.path[0]+r'\detectron\projects\PointRend')
+#模型需要将以下三行取消注释
+#from yolov5.detect import yolo_detect
+#from detectron.detect import keypoint_detect
+#from detectron.projects.PointRend.detect import pointrend_detect
+import copy
+from Inflation_search import calculate_length,convert_to_images,re_ploy
 
 class MyApp(QtWidgets.QMainWindow):
-    showlogSignal = pyqtSignal()
 
+    showlogSignal = pyqtSignal()
     def __init__(self):
         super().__init__()
         uic.loadUi('mainwindows.ui', self)
@@ -29,22 +32,9 @@ class MyApp(QtWidgets.QMainWindow):
 
         # 槽函数初始化
         self.init_signal_slots()
-
         # 软件图标设置
         self.setWindowIcon(QIcon('logo2.png'))
 
-        # 添加事件过滤器以捕获滚轮事件
-        self.label_image.installEventFilter(self)
-
-    def eventFilter(self, source, event):
-        """事件过滤器，用于处理鼠标滚轮事件"""
-        if event.type() == QtCore.QEvent.Wheel and source is self.label_image:
-            if event.angleDelta().y() > 0:
-                self.zoomIn()
-            else:
-                self.zoomOut()
-            return True
-        return super().eventFilter(source, event)
 
     def init_image_viewer_and_controls(self):
         # 初始化控制图片的按钮和功能
@@ -85,9 +75,18 @@ class MyApp(QtWidgets.QMainWindow):
 
     def init_signal_slots(self):
         """初始化信号槽连接"""
-        self.pushButton.clicked.connect(self.openImage)
-        self.rotateClockwiseButton.clicked.connect(self.rotateClockwise)
-        self.rotateCounterclockwiseButton.clicked.connect(self.rotateCounterclockwise)
+        if self.pushButton:
+            self.pushButton.clicked.connect(self.openImage)
+        if self.zoomInButton:
+            self.zoomInButton.clicked.connect(self.zoomIn)
+        if self.zoomOutButton:
+            self.zoomOutButton.clicked.connect(self.zoomOut)
+        if self.rotateClockwiseButton:
+            self.rotateClockwiseButton.clicked.connect(self.rotateClockwise)
+        if self.rotateCounterclockwiseButton:
+            self.rotateCounterclockwiseButton.clicked.connect(self.rotateCounterclockwise)
+        if self.searchBar:
+            self.searchBar.textChanged.connect(self.searchLog)
 
         self.pushButton.clicked.connect(self.openImage)
         self.pushButton_4.clicked.connect(self.show_yolo)
@@ -107,6 +106,10 @@ class MyApp(QtWidgets.QMainWindow):
             file.truncate(0)
         QMessageBox.information(self, "提示", "已清空日志")
 
+    def change_button_color(self, button, color):
+        """改变按钮的背景色"""
+        button.setStyleSheet(f"background-color: {color.name()};")
+
     def openImage(self):
         try:
             self.imgName, _ = QFileDialog.getOpenFileName(
@@ -123,8 +126,6 @@ class MyApp(QtWidgets.QMainWindow):
             )
             if self.imgName:
                 self.pixmap = QPixmap(self.imgName)
-                if self.pixmap.isNull():
-                    raise ValueError("Failed to load image.")
                 self.display_scaled_image()
                 self.add_log(f"加载了图片: {self.imgName}")
                 self.yolo_detect()
@@ -135,7 +136,6 @@ class MyApp(QtWidgets.QMainWindow):
                 self.add_log(f"未选择图片")
         except Exception as e:
             self.add_log(f"加载图片时出现错误: {e}")
-            QMessageBox.critical(self, "错误", "加载图片时出现错误，请重试。")
 
     def display_scaled_image(self):
         """根据当前缩放比例和旋转角度显示图片"""
@@ -168,8 +168,8 @@ class MyApp(QtWidgets.QMainWindow):
 
     def zoomIn(self):
         try:
-            if self.scaleFactor < 3.0:  # 最大放大倍数为3倍
-                self.scaleFactor *= 1.05  # 适当放大
+            if self.scaleFactor <= 3.9:  # 限制最大放大倍数，并预留一定余地防止溢出
+                self.scaleFactor *= 1.1
                 self.display_scaled_image()
         except Exception as e:
             self.add_log(f"Zoom In 出现错误: {e}")
@@ -177,8 +177,8 @@ class MyApp(QtWidgets.QMainWindow):
 
     def zoomOut(self):
         try:
-            if self.scaleFactor > 0.1:  # 最小缩小倍数为0.1
-                self.scaleFactor /= 1.05  # 适当缩小
+            if self.scaleFactor > 0.5:  # 限制最小缩放倍数
+                self.scaleFactor /= 1.1
                 self.display_scaled_image()
         except Exception as e:
             self.add_log(f"Zoom Out 出现错误: {e}")
@@ -202,12 +202,11 @@ class MyApp(QtWidgets.QMainWindow):
             self.rotationAngle -= 90
             if self.rotationAngle <= -360:
                 self.rotationAngle += 360
-            # 每次旋转后，保持当前缩放比例
+            # 每次旋转后，将缩放比例重置为1，确保图片不变形
             self.display_scaled_image()
         except Exception as e:
             self.add_log(f"Rotate Counterclockwise 出现错误: {e}")
             print(f"Rotate Counterclockwise 出现错误: {e}")
-
     def add_log(self, message):
         """向日志区域添加一条新的日志信息。"""
         timestamp = QDateTime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss.zzz")
@@ -238,6 +237,15 @@ class MyApp(QtWidgets.QMainWindow):
                 if not cursor.isNull():
                     cursor.mergeCharFormat(highlight_format)
 
+    def closeEvent(self, event):
+        log_content = self.logArea.toPlainText()
+        print("关闭事件被触发")
+        try:
+            savelog.save_log(log_content)
+        except Exception as e:
+            print(f"保存日志时出错: {e}")
+        event.accept()
+
     def yolo_detect(self):
         self.yolo_confs, self.yolo_components, self.yolo_time = yolo_detect(self.imgName)
 
@@ -253,6 +261,8 @@ class MyApp(QtWidgets.QMainWindow):
         for i, item in enumerate(keypoint_info):
             x, y, conf = item
             keypoint_posinfo[self.keypoint_names[i]] = [x, y]
+
+
 
     def show_yolo(self):
         if self.imgName:
@@ -283,3 +293,9 @@ class MyApp(QtWidgets.QMainWindow):
                                                   Qt.SmoothTransformation)
             self.label_image.setPixmap(scaled_pixmap)
             self.label_image.adjustSize()
+
+
+
+
+
+
