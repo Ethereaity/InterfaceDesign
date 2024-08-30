@@ -17,6 +17,7 @@ sys.path.insert(3,sys.path[0]+r'\detectron\projects\PointRend')
 from yolov5.detect import yolo_detect
 from detectron.detect import keypoint_detect
 from detectron.projects.PointRend.detect import pointrend_detect
+from ewindows import SaveE,ShowE
 import copy
 from Inflation_search import calculate_length,convert_to_images,re_ploy
 
@@ -87,6 +88,9 @@ class MyApp(QtWidgets.QMainWindow):
         # 将缩放后的图片设置到label中
         self.label.setPixmap(scaled_pixmap)
 
+        with open('exception.txt','w',encoding='utf-8') as f:
+            f.write("异常：\n")
+
     def init_signal_slots(self):
         """初始化信号槽连接"""
         self.pushButton.clicked.connect(self.openImage)
@@ -94,13 +98,24 @@ class MyApp(QtWidgets.QMainWindow):
         self.rotateCounterclockwiseButton.clicked.connect(self.rotateCounterclockwise)
 
         self.pushButton.clicked.connect(self.openImage)
+        self.pushButton_3.clicked.connect(self.save_e)
         self.pushButton_4.clicked.connect(self.show_yolo)
         self.pushButton_5.clicked.connect(self.show_maskrcnn)
         self.pushButton_6.clicked.connect(self.show_pointrend)
         # 菜单栏槽函数
         self.Import.triggered.connect(self.openImage)
         self.log.triggered.connect(self.show_log)
+        self.exception.triggered.connect(self.show_e)
         self.log_clear.triggered.connect(self.clear_log)
+
+    def save_e(self):
+        self.ewindow1=SaveE()
+        self.ewindow1.show()
+
+    def show_e(self):
+        self.ewindow2 = ShowE()
+        self.ewindow2.show()
+
 
     def show_log(self):
         # 发射信号给弹出界面
@@ -296,8 +311,3 @@ class MyApp(QtWidgets.QMainWindow):
                                                   Qt.SmoothTransformation)
             self.label_image.setPixmap(scaled_pixmap)
             self.label_image.adjustSize()
-
-
-
-
-
