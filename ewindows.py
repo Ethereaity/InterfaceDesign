@@ -1,8 +1,9 @@
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtWidgets import QApplication,QPlainTextEdit,QPushButton,QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QPlainTextEdit, QPushButton, QVBoxLayout, QComboBox, QWidget, QScrollArea
 import sys
 
-
+from PyQt5 import QtWidgets, uic
+from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QPlainTextEdit, QComboBox, QWidget, QScrollArea
 
 class SaveE(QtWidgets.QMainWindow):
     def __init__(self):
@@ -10,59 +11,56 @@ class SaveE(QtWidgets.QMainWindow):
         uic.loadUi('saveE.ui', self)
         self.resize(600, 400)
 
-        self.button = self.findChild(QPushButton, 'button')
-        self.text_edit = self.findChild(QPlainTextEdit, 'edit')
-        self.text_edit.setPlaceholderText('请输入异常信息')
-        if self.button:
-            self.button.clicked.connect(self.save)
+        # 通过 findChild 找到 scroll area 和其内容部件
+        self.scroll_area = self.findChild(QScrollArea, 'scrollArea')
+        if not self.scroll_area:
+            print("Error: QScrollArea not found.")
+        self.scroll_area_widget = self.findChild(QWidget, 'scrollAreaWidget')
+        if not self.scroll_area_widget:
+            print("Error: scrollAreaWidget not found.")
+
+        # 只有在 self.scroll_area_widget 被正确找到的情况下才设置布局
+        if self.scroll_area_widget:
+            self.layout = QVBoxLayout(self.scroll_area_widget)
+            self.scroll_area_widget.setLayout(self.layout)
+
+            # 在 scroll area 的内容部件中添加控件
+            self.combo_box = self.findChild(QComboBox, 'comboBox')
+            self.text_edit = self.findChild(QPlainTextEdit, 'edit')
+            self.button = self.findChild(QPushButton, 'button1')
+
+            # 先添加 comboBox，再添加 textEdit，最后添加 button
+            if self.combo_box:
+                self.layout.addWidget(self.combo_box)
+            if self.text_edit:
+                self.layout.addWidget(self.text_edit)
+            if self.button:
+                self.layout.addWidget(self.button)
+
+            # 设置控件的占位文本
+            if self.text_edit:
+                self.text_edit.setPlaceholderText('请输入异常信息')
+
+            # 连接按钮的点击信号
+            if self.button:
+                self.button.clicked.connect(self.save)
+        else:
+            print("Error: scrollAreaWidget was not properly initialized.")
 
     def save(self):
-        if self.text_edit:
+        if self.text_edit and self.combo_box:
             text = self.text_edit.toPlainText()
-            with open('exception.txt', 'a') as f:
-                f.write(text)
+            selected_option = self.combo_box.currentText()
+            with open('exception.txt', 'a', encoding='utf-8') as f:
+                # 在异常信息前添加选择框的值
+                f.write(f"[{selected_option}] {text}\n")
+                f.write("="*40 + "\n")  # 分隔符
             self.close()
         else:
-            print("Error: QTextEdit not found when trying to save.")
-
-
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget
-
-
-class ShowE(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("异常信息")
-        self.resize(400, 700)
-
-        widget = QWidget(self)
-        self.setCentralWidget(widget)
-        layout = QVBoxLayout(widget)
-        self.edit = QPlainTextEdit()
-        self.btn = QPushButton("save")
-        layout.addWidget(self.edit)
-        layout.addWidget(self.btn)
-
-        self.btn.clicked.connect(self.save)
-
-        with open('exception.txt', 'r', encoding='utf-8') as f:
-            self.text = f.read()
-        self.edit.setPlainText(self.text)
-
-    def save(self):
-        self.text = self.edit.toPlainText()
-        with open('exception.txt', 'w', encoding='utf-8') as f:
-            f.write(self.text)
-        self.close()
+            print("Error: QPlainTextEdit or QComboBox not found when trying to save.")
 
 if __name__ == "__main__":
-
     app = QApplication(sys.argv)
-    '''
-    window = SaveE()
-    window.show()
-    '''
-    window=ShowE()
+    window = SaveE()  # 启动 SaveE 窗口
     window.show()
     sys.exit(app.exec_())
-
