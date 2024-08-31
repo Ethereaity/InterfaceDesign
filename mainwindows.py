@@ -17,7 +17,7 @@ sys.path.insert(3,sys.path[0]+r'\detectron\projects\PointRend')
 #from yolov5.detect import yolo_detect
 #from detectron.detect import keypoint_detect
 #from detectron.projects.PointRend.detect import pointrend_detect
-from ewindows import SaveE,ShowE
+from ewindows import SaveE
 import copy
 from Inflation_search import calculate_length,convert_to_images,re_ploy
 
