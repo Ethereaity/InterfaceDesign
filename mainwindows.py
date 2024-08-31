@@ -93,11 +93,9 @@ class MyApp(QtWidgets.QMainWindow):
 
     def init_signal_slots(self):
         """初始化信号槽连接"""
-        self.pushButton.clicked.connect(self.openImage)
         self.rotateClockwiseButton.clicked.connect(self.rotateClockwise)
         self.rotateCounterclockwiseButton.clicked.connect(self.rotateCounterclockwise)
 
-        self.pushButton.clicked.connect(self.openImage)
         self.pushButton_3.clicked.connect(self.save_e)
         self.pushButton_4.clicked.connect(self.show_yolo)
         self.pushButton_5.clicked.connect(self.show_maskrcnn)
@@ -105,16 +103,11 @@ class MyApp(QtWidgets.QMainWindow):
         # 菜单栏槽函数
         self.Import.triggered.connect(self.openImage)
         self.log.triggered.connect(self.show_log)
-        self.exception.triggered.connect(self.show_e)
         self.log_clear.triggered.connect(self.clear_log)
 
     def save_e(self):
         self.ewindow1=SaveE()
         self.ewindow1.show()
-
-    def show_e(self):
-        self.ewindow2 = ShowE()
-        self.ewindow2.show()
 
 
     def show_log(self):
