@@ -10,13 +10,24 @@ from PyQt5.QtGui import QPixmap, QTransform,QIcon
 from PyQt5.QtCore import pyqtSignal
 import sys
 import json
+from PyQt5.QtWidgets import QMessageBox, QFileDialog, QPushButton
+from PyQt5.QtGui import QPixmap, QPainter, QPen
+from PyQt5.QtGui import QTransform
+
+import json
+
+
 sys.path.insert(1,sys.path[0]+r'\yolov5')
 sys.path.insert(2,sys.path[0]+r'\detectron')
 sys.path.insert(3,sys.path[0]+r'\detectron\projects\PointRend')
+
+
 #模型需要将以下三行取消注释
-#from yolov5.detect import yolo_detect
-#from detectron.detect import keypoint_detect
-#from detectron.projects.PointRend.detect import pointrend_detect
+from yolov5.detect import yolo_detect
+from detectron.detect import keypoint_detect
+from detectron.projects.PointRend.detect import pointrend_detect
+
+
 from ewindows import SaveE
 import copy
 from Inflation_search import calculate_length,convert_to_images,re_ploy
@@ -40,6 +51,8 @@ class MyApp(QtWidgets.QMainWindow):
 
         # 添加事件过滤器以捕获滚轮事件
         self.label_image.installEventFilter(self)
+
+        self.annotations = []  # 初始化批注列表
 
     def eventFilter(self, source, event):
         """事件过滤器，用于处理鼠标滚轮事件"""
@@ -73,6 +86,12 @@ class MyApp(QtWidgets.QMainWindow):
         self.rotateClockwiseButton = self.findChild(QPushButton, "rotateClockwiseButton")
         self.rotateCounterclockwiseButton = self.findChild(QPushButton, "rotateCounterclockwiseButton")
 
+        self.addAnnotationButton = self.findChild(QPushButton, "addAnnotationButton")
+        self.saveAnnotationsButton = self.findChild(QPushButton, "saveAnnotationsButton")
+        self.loadAnnotationsButton = self.findChild(QPushButton, "loadAnnotationsButton")
+        self.clearAnnotationsButton = self.findChild(QPushButton, "clearAnnotationsButton")
+        self.convertImageFormatButton = self.findChild(QPushButton, "convertImageFormatButton")
+
         # 设置 QLabel 居中显示
         self.label_image.setAlignment(Qt.AlignCenter)
 
@@ -93,8 +112,10 @@ class MyApp(QtWidgets.QMainWindow):
 
     def init_signal_slots(self):
         """初始化信号槽连接"""
+
         self.rotateClockwiseButton.clicked.connect(self.rotateClockwise)
         self.rotateCounterclockwiseButton.clicked.connect(self.rotateCounterclockwise)
+
 
         self.pushButton_3.clicked.connect(self.save_e)
         self.pushButton_4.clicked.connect(self.show_yolo)
@@ -104,6 +125,11 @@ class MyApp(QtWidgets.QMainWindow):
         self.Import.triggered.connect(self.openImage)
         self.log.triggered.connect(self.show_log)
         self.log_clear.triggered.connect(self.clear_log)
+
+
+
+
+
 
     def save_e(self):
         self.ewindow1=SaveE()
@@ -139,10 +165,12 @@ class MyApp(QtWidgets.QMainWindow):
                     raise ValueError("Failed to load image.")
                 self.display_scaled_image()
                 self.add_log(f"加载了图片: {self.imgName}")
+                '''
                 self.yolo_detect()
                 self.keypoint_detect()
                 self.pointrend_detect()
                 self.length_detect()
+                '''
             else:
                 self.add_log(f"未选择图片")
         except Exception as e:
@@ -304,3 +332,74 @@ class MyApp(QtWidgets.QMainWindow):
                                                   Qt.SmoothTransformation)
             self.label_image.setPixmap(scaled_pixmap)
             self.label_image.adjustSize()
+
+    def add_annotation(self):
+        """添加批注到图片"""
+        try:
+            if not self.imgName:
+                QMessageBox.warning(self, "警告", "请先打开一张图片。")
+                return
+
+            # 假设批注为一个简单的列表，实际应用中可能会包含更多数据
+            annotation = {'type': 'circle', 'x': 100, 'y': 100, 'radius': 50}
+            self.annotations.append(annotation)
+            self.display_scaled_image()
+            self.add_log(f"添加了批注: {annotation}")
+        except Exception as e:
+            self.add_log(f"添加批注时出现错误: {e}")
+            QMessageBox.critical(self, "错误", "添加批注时出现错误，请重试。")
+
+    def save_annotations(self):
+        """保存批注到 JSON 文件"""
+        try:
+            if not self.imgName:
+                QMessageBox.warning(self, "警告", "请先打开一张图片。")
+                return
+
+            file_name, _ = QFileDialog.getSaveFileName(self, "保存批注", "", "JSON Files (*.json)")
+            if file_name:
+                with open(file_name, 'w') as file:
+                    json.dump(self.annotations, file, indent=4)
+                QMessageBox.information(self, "成功", "批注已保存。")
+        except Exception as e:
+            self.add_log(f"保存批注时出现错误: {e}")
+            QMessageBox.critical(self, "错误", "保存批注时出现错误，请重试。")
+
+    def load_annotations(self):
+        """从 JSON 文件加载批注"""
+        try:
+            file_name, _ = QFileDialog.getOpenFileName(self, "打开批注文件", "", "JSON Files (*.json)")
+            if file_name:
+                with open(file_name, 'r') as file:
+                    self.annotations = json.load(file)
+                self.display_scaled_image()
+                QMessageBox.information(self, "成功", "批注已加载。")
+        except Exception as e:
+            self.add_log(f"加载批注时出现错误: {e}")
+            QMessageBox.critical(self, "错误", "加载批注时出现错误，请重试。")
+
+    def convert_image_format(self):
+        """转换图像格式"""
+        try:
+            if not self.imgName:
+                QMessageBox.warning(self, "警告", "请先打开一张图片。")
+                return
+
+            file_name, _ = QFileDialog.getSaveFileName(self, "保存图像", "",
+                                                       "JPEG Files (*.jpg *.jpeg);;PNG Files (*.png);;BMP Files (*.bmp);;TIFF Files (*.tif *.tiff);;All Files (*)")
+            if file_name:
+                self.pixmap.save(file_name)
+                QMessageBox.information(self, "成功", "图像已保存。")
+        except Exception as e:
+            self.add_log(f"转换图像格式时出现错误: {e}")
+            QMessageBox.critical(self, "错误", "转换图像格式时出现错误，请重试。")
+
+    def clear_annotations(self):
+        """清除所有批注"""
+        try:
+            self.annotations = []
+            self.display_scaled_image()
+            QMessageBox.information(self, "成功", "所有批注已清除。")
+        except Exception as e:
+            self.add_log(f"清除批注时出现错误: {e}")
+            QMessageBox.critical(self, "错误", "清除批注时出现错误，请重试。")
