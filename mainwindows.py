@@ -23,9 +23,9 @@ sys.path.insert(3,sys.path[0]+r'\detectron\projects\PointRend')
 
 
 #模型需要将以下三行取消注释
-from yolov5.detect import yolo_detect
-from detectron.detect import keypoint_detect
-from detectron.projects.PointRend.detect import pointrend_detect
+#from yolov5.detect import yolo_detect
+#from detectron.detect import keypoint_detect
+#from detectron.projects.PointRend.detect import pointrend_detect
 
 
 from ewindows import SaveE
