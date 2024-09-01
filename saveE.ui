@@ -26,7 +26,7 @@
          <x>0</x>
          <y>0</y>
          <width>667</width>
-         <height>621</height>
+         <height>623</height>
         </rect>
        </property>
        <widget class="QWidget" name="layoutWidget">
@@ -41,28 +41,49 @@
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
           <widget class="QComboBox" name="comboBox">
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(255, 249, 206);
+font: 75 8pt &quot;微软雅黑&quot;;
+color: rgb(182, 17, 2);
+</string>
+           </property>
            <item>
             <property name="text">
-             <string>错误信息1</string>
+             <string>外观破损</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>错误信息2</string>
+             <string>部件缺失</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>错误信息3</string>
+             <string>尺寸不达标</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>其他错误</string>
             </property>
            </item>
           </widget>
          </item>
          <item>
-          <widget class="QPlainTextEdit" name="edit"/>
+          <widget class="QPlainTextEdit" name="edit">
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(176, 208, 207);
+font: 10pt &quot;微软雅黑&quot;;</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="button1">
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(98, 165, 158);
+color: rgb(35, 59, 57);
+font: 10pt &quot;Arial Rounded MT Bold&quot;;</string>
+           </property>
            <property name="text">
             <string>save</string>
            </property>
@@ -81,7 +102,7 @@
      <x>0</x>
      <y>0</y>
      <width>687</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

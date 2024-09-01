@@ -890,7 +890,6 @@ background-color: rgb(255, 255, 255);</string>
     <addaction name="Import"/>
     <addaction name="Export"/>
     <addaction name="Save"/>
-    <addaction name="exception"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
