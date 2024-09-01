@@ -1,17 +1,18 @@
 import sys
 import logo
+import os
 import savelog
 from PyQt5 import QtWidgets, uic,QtCore
 from PyQt5.QtGui import QPixmap, QTransform, QTextCharFormat, QTextCursor
 from PyQt5.QtWidgets import QMainWindow, QTextEdit, QFileDialog, QWidget, QApplication, QDialog, QLabel, QVBoxLayout, \
-    QPushButton, QHBoxLayout, QComboBox, QLineEdit,QScrollArea,QMessageBox
-from PyQt5.QtCore import Qt, QSize, QDateTime, QRegularExpression
+    QPushButton, QHBoxLayout, QComboBox, QLineEdit,QScrollArea,QMessageBox, QFileSystemModel,QTreeView
+from PyQt5.QtCore import Qt, QSize, QDateTime, QRegularExpression, QModelIndex
 from PyQt5.QtGui import QPixmap, QTransform,QIcon
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal,QDir,QModelIndex
 import sys
 import json
 from PyQt5.QtWidgets import QMessageBox, QFileDialog, QPushButton
-from PyQt5.QtGui import QPixmap, QPainter, QPen
+from PyQt5.QtGui import QPixmap, QPainter, QPen,QStandardItemModel
 from PyQt5.QtGui import QTransform
 
 import json
@@ -91,6 +92,7 @@ class MyApp(QtWidgets.QMainWindow):
         self.loadAnnotationsButton = self.findChild(QPushButton, "loadAnnotationsButton")
         self.clearAnnotationsButton = self.findChild(QPushButton, "clearAnnotationsButton")
         self.convertImageFormatButton = self.findChild(QPushButton, "convertImageFormatButton")
+        self.treeView = self.findChild(QTreeView, "treeView")
 
         # 设置 QLabel 居中显示
         self.label_image.setAlignment(Qt.AlignCenter)
@@ -110,6 +112,18 @@ class MyApp(QtWidgets.QMainWindow):
         with open('exception.txt','w',encoding='utf-8') as f:
             f.write("异常：\n")
 
+        # 文件浏览
+        self._home = QDir.rootPath()
+        self.filemodel = QFileSystemModel()
+        self.filemodel.setRootPath(self._home)
+        self.treeView.setModel(self.filemodel)  # 设置QTreeView的Model
+        self.headerModel = QStandardItemModel()
+        self.headerModel.setColumnCount(1)  # 设置model的列数
+        self.headerModel.setHeaderData(0, Qt.Horizontal, '文件名', 0)
+        header = self.treeView.header()
+        header.setModel(self.headerModel)  # 设置QTreeView#Header的Model
+        self.treeView.setRootIndex(self.filemodel.index(self._home))  # 设置RootIndex
+
     def init_signal_slots(self):
         """初始化信号槽连接"""
 
@@ -121,6 +135,7 @@ class MyApp(QtWidgets.QMainWindow):
         self.pushButton_4.clicked.connect(self.show_yolo)
         self.pushButton_5.clicked.connect(self.show_maskrcnn)
         self.pushButton_6.clicked.connect(self.show_pointrend)
+        self.treeView.clicked.connect(self.update_image)
         # 菜单栏槽函数
         self.Import.triggered.connect(self.openImage)
         self.log.triggered.connect(self.show_log)
@@ -128,8 +143,15 @@ class MyApp(QtWidgets.QMainWindow):
 
 
 
-
-
+    def update_image(self, index):
+        new_imgName = self.filemodel.filePath(index)
+        if new_imgName and new_imgName.endswith((".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".JPG", ".JPEG", ".PNG", ".TIF", ".TIFF")):
+            self.imgName = new_imgName
+            self.pixmap = QPixmap(self.imgName)
+            if self.pixmap.isNull():
+                raise ValueError("Failed to load image.")
+            self.display_scaled_image()
+            self.add_log(f"加载了图片: {self.imgName}")
 
     def save_e(self):
         self.ewindow1=SaveE()
@@ -165,6 +187,8 @@ class MyApp(QtWidgets.QMainWindow):
                     raise ValueError("Failed to load image.")
                 self.display_scaled_image()
                 self.add_log(f"加载了图片: {self.imgName}")
+                directory_path = os.path.dirname(os.path.abspath(self.imgName))
+                self.treeView.setRootIndex(self.filemodel.index(directory_path))  # 设置RootIndex
                 '''
                 self.yolo_detect()
                 self.keypoint_detect()
