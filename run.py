@@ -28,6 +28,5 @@ if __name__ == "__main__":
     window = mainwindows.MyApp()
     log_window = logwindows.Log()
     window.showlogSignal.connect(log_window.show_log)
-
-    window.show()
+    window.showMaximized()
     sys.exit(app.exec_())

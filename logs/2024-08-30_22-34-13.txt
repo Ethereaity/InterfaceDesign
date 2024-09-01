@@ -1,0 +1,3 @@
+[2024-08-30 22:33:56.500] 加载了图片: C:/Users/86151/Desktop/5.3/IMG_1774.JPG
+
+[2024-08-30 22:33:56.502] 加载图片时出现错误: name 'yolo_detect' is not defined
