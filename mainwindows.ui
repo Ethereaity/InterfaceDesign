@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>855</width>
-    <height>842</height>
+    <width>699</width>
+    <height>840</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,8 +36,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>673</width>
-           <height>778</height>
+           <width>517</width>
+           <height>776</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="gridLayout_8">
@@ -288,8 +288,8 @@ border-radius: 18px;</string>
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>632</width>
-                   <height>467</height>
+                   <width>476</width>
+                   <height>465</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_9" columnstretch="1,5">
@@ -309,9 +309,6 @@ border-radius: 18px;</string>
                     </property>
                     <property name="text">
                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                     </property>
                    </widget>
                   </item>
@@ -908,7 +905,7 @@ background-color: rgb(255, 255, 255);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>855</width>
+     <width>699</width>
      <height>22</height>
     </rect>
    </property>
@@ -927,19 +924,8 @@ background-color: rgb(255, 255, 255);</string>
     <addaction name="log"/>
     <addaction name="log_clear"/>
    </widget>
-   <widget class="QMenu" name="menu_3">
-    <property name="title">
-     <string>批注</string>
-    </property>
-    <addaction name="loadAnnotationButtons"/>
-    <addaction name="addAnnotationButtons"/>
-    <addaction name="saveAnnotationButtons"/>
-    <addaction name="clearAnnotationButtons"/>
-    <addaction name="convertImageFormatButtons"/>
-   </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
-   <addaction name="menu_3"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="Import">
@@ -988,39 +974,6 @@ background-color: rgb(255, 255, 255);</string>
   <action name="exception">
    <property name="text">
     <string>异常</string>
-   </property>
-  </action>
-  <action name="addAnnotationButtons">
-   <property name="text">
-    <string>添加批注</string>
-   </property>
-  </action>
-  <action name="saveAnnotationButtons">
-   <property name="text">
-    <string>保存批注</string>
-   </property>
-  </action>
-  <action name="loadAnnotationButtons">
-   <property name="text">
-    <string>加载批注</string>
-   </property>
-  </action>
-  <action name="clearAnnotationButtons">
-   <property name="text">
-    <string>清除批注</string>
-   </property>
-  </action>
-  <action name="convertImageFormatButtons">
-   <property name="text">
-    <string>转换图片格式</string>
-   </property>
-  </action>
-  <action name="startDrawingLineButton">
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>直线</string>
    </property>
   </action>
  </widget>

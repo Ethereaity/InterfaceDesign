@@ -47,7 +47,7 @@ class SaveE(QtWidgets.QMainWindow):
         else:
             print("Error: scrollAreaWidget was not properly initialized.")
 
-    def save(self):
+    def save(self,imgname):
         if self.text_edit and self.combo_box:
             text = self.text_edit.toPlainText()
             selected_option = self.combo_box.currentText()
@@ -55,6 +55,7 @@ class SaveE(QtWidgets.QMainWindow):
                 # 在异常信息前添加选择框的值
                 f.write(f"[{selected_option}] {text}\n")
                 f.write("="*40 + "\n")  # 分隔符
+
             self.close()
         else:
             print("Error: QPlainTextEdit or QComboBox not found when trying to save.")
