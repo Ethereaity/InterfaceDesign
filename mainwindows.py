@@ -156,6 +156,13 @@ class MyApp(QtWidgets.QMainWindow):
         self.loadAnnotationsButton = self.findChild(QPushButton, "loadAnnotationsButton")
         self.clearAnnotationsButton = self.findChild(QPushButton, "clearAnnotationsButton")
         self.convertImageFormatButton = self.findChild(QPushButton, "convertImageFormatButton")
+
+
+
+        # 确保在使用这些按钮之前，它们已经被找到并且不是 None
+        if None in [self.addAnnotationButton, self.saveAnnotationsButton, self.loadAnnotationsButton,
+                    self.clearAnnotationsButton, self.convertImageFormatButton]:
+            print("One or more buttons not found. Please check the object names in the .ui file.")
         self.treeView = self.findChild(QTreeView, "treeView")
 
         # 新添加的两个按钮
@@ -255,6 +262,12 @@ class MyApp(QtWidgets.QMainWindow):
         self.log.triggered.connect(self.show_log)
         self.log_clear.triggered.connect(self.clear_log)
 
+        self.addAnnotationButtons.triggered.connect(self.add_annotation)
+        self.saveAnnotationButtons.triggered.connect(self.save_annotations)
+        self.clearAnnotationButtons.triggered.connect(self.clear_annotations)
+        self.loadAnnotationButtons.triggered.connect(self.load_annotations)
+        self.convertImageFormatButtons.triggered.connect(self.convert_image_format)
+
 
 
     def update_image(self, index):
@@ -325,7 +338,7 @@ class MyApp(QtWidgets.QMainWindow):
                 print("Error: label_image is not properly initialized or has zero size.")
                 return
 
-            # 计算当前的中心点
+                # 计算当前的中心点
             old_center = self.label_image.rect().center()
 
             # 按比例缩放图片
@@ -338,7 +351,19 @@ class MyApp(QtWidgets.QMainWindow):
 
             # 设置缩放后的QPixmap
             self.label_image.setPixmap(rotated_pixmap)
+
+            # 在图片上绘制批注
+            painter = QPainter(self.label_image.pixmap())
+            painter.setPen(QPen(Qt.red, 2))
+            for ann in self.annotations:
+                if ann['type'] == 'circle':
+                    painter.drawEllipse(ann['x'], ann['y'], ann['radius'], ann['radius'])
+            painter.end()
+
             self.label_image.adjustSize()
+
+            # 确保标签的大小足够容纳缩放后的图片
+            # self.label_image.setFixedSize(rotated_pixmap.size())
 
             # 计算新的中心点
             new_center = self.label_image.rect().center()
