@@ -14,7 +14,7 @@ import json
 from PyQt5.QtWidgets import QMessageBox, QFileDialog, QPushButton
 from PyQt5.QtGui import QPixmap, QPainter, QPen,QStandardItemModel
 from PyQt5.QtGui import QTransform
-
+from PyQt5.QtCore import QStorageInfo
 import json
 
 
@@ -158,6 +158,10 @@ class MyApp(QtWidgets.QMainWindow):
         self.convertImageFormatButton = self.findChild(QPushButton, "convertImageFormatButton")
         self.treeView = self.findChild(QTreeView, "treeView")
 
+        # 新添加的两个按钮
+        self.newButton1 = self.findChild(QPushButton, "newButton1")
+        self.newButton2 = self.findChild(QPushButton, "newButton2")
+
         # 设置 QLabel 居中显示
         self.label_image.setAlignment(Qt.AlignCenter)
 
@@ -177,23 +181,69 @@ class MyApp(QtWidgets.QMainWindow):
             f.write("异常：\n")
 
         # 文件浏览
-        self._home = QDir.rootPath()
+        self.updateDriveList()
+        self._home = QDir.rootPath()  # 你可以替换为你实际想要展示的路径
         self.filemodel = QFileSystemModel()
         self.filemodel.setRootPath(self._home)
-        self.treeView.setModel(self.filemodel)  # 设置QTreeView的Model
+        self.treeView.setModel(self.filemodel)  # 设置 QTreeView 的 Model
+        self.currentDriveIndex = 0
+        # 设置表头模型
         self.headerModel = QStandardItemModel()
-        self.headerModel.setColumnCount(1)  # 设置model的列数
-        self.headerModel.setHeaderData(0, Qt.Horizontal, '文件名', 0)
+        self.headerModel.setColumnCount(1)  # 设置 model 的列数
+        self.headerModel.setHeaderData(0, Qt.Horizontal, '文件名', Qt.DisplayRole)
         header = self.treeView.header()
-        header.setModel(self.headerModel)  # 设置QTreeView#Header的Model
-        self.treeView.setRootIndex(self.filemodel.index(self._home))  # 设置RootIndex
+        header.setModel(self.headerModel)  # 设置 QTreeView 的 Header 的 Model
 
+        # 设置 RootIndex
+        self.treeView.setRootIndex(self.filemodel.index(self._home))
+
+    def updateDriveList(self):
+        # 获取所有驱动器的信息
+        drives = [info.rootPath() for info in QStorageInfo.mountedVolumes()]
+        self.drives = drives
+    def updateButtonState(self):
+        """更新按钮状态"""
+        if not self.drives:
+            self.newButton1.setEnabled(False)
+            self.newButton2.setEnabled(False)
+        else:
+            self.newButton1.setEnabled(len(self.drives) > 1)
+            self.newButton2.setEnabled(len(self.drives) > 1)
+
+    def handleNewButton1(self):
+        """按字母倒序切换盘符"""
+        if self.drives:
+            self.currentDriveIndex = (self.currentDriveIndex - 1) % len(self.drives)
+            self.showDrive()
+
+    def handleNewButton2(self):
+        """按字母顺序切换盘符"""
+        if self.drives:
+            self.currentDriveIndex = (self.currentDriveIndex + 1) % len(self.drives)
+            self.showDrive()
+
+    def showDrive(self):
+        """显示当前盘符的内容"""
+        currentDrive = self.drives[self.currentDriveIndex]
+        QtWidgets.QMessageBox.information(self, "Current Drive", f"Current Drive: {currentDrive}")
+
+        # 更新 treeView 的根索引为当前驱动器的路径
+        self.treeView.setRootIndex(self.filemodel.index(currentDrive))
+
+        # 更新按钮状态
+        self.updateButtonState()
+
+    def some_method(self):
+        if not self.drives:
+            QtWidgets.QMessageBox.warning(self, "警告", "没有可用的驱动器")
+            return
     def init_signal_slots(self):
         """初始化信号槽连接"""
 
         self.rotateClockwiseButton.clicked.connect(self.rotateClockwise)
         self.rotateCounterclockwiseButton.clicked.connect(self.rotateCounterclockwise)
-
+        self.newButton1.clicked.connect(self.handleNewButton1)
+        self.newButton2.clicked.connect(self.handleNewButton2)
 
         self.pushButton_3.clicked.connect(self.save_e)
         self.pushButton_4.clicked.connect(self.show_yolo)
