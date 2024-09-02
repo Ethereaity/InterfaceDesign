@@ -2,36 +2,36 @@ import sys
 import logo
 import os
 import savelog
-from PyQt5 import QtWidgets, uic,QtCore
+from PyQt5 import QtWidgets, uic, QtCore
 from PyQt5.QtGui import QPixmap, QTransform, QTextCharFormat, QTextCursor
 from PyQt5.QtWidgets import QMainWindow, QTextEdit, QFileDialog, QWidget, QApplication, QDialog, QLabel, QVBoxLayout, \
-    QPushButton, QHBoxLayout, QComboBox, QLineEdit,QScrollArea,QMessageBox, QFileSystemModel,QTreeView
-from PyQt5.QtCore import Qt, QSize, QDateTime, QRegularExpression, QModelIndex,QPoint
-from PyQt5.QtGui import QPixmap, QTransform,QIcon
-from PyQt5.QtCore import pyqtSignal,QDir,QModelIndex
+    QPushButton, QHBoxLayout, QComboBox, QLineEdit, QScrollArea, QMessageBox, QFileSystemModel, QTreeView, QInputDialog
+from PyQt5.QtCore import Qt, QSize, QDateTime, QRegularExpression, QModelIndex, QPoint
+from PyQt5.QtGui import QPixmap, QTransform, QIcon
+from PyQt5.QtCore import pyqtSignal, QDir, QModelIndex
 import sys
 import json
 from PyQt5.QtWidgets import QMessageBox, QFileDialog, QPushButton
-from PyQt5.QtGui import QPixmap, QPainter, QPen,QStandardItemModel
-from PyQt5.QtGui import QTransform
+from PyQt5.QtGui import QPixmap, QPainter, QPen, QStandardItemModel
 from PyQt5.QtCore import QStorageInfo
+from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsEllipseItem, QGraphicsRectItem, QGraphicsLineItem, QGraphicsPathItem, QInputDialog, QMessageBox
+from PyQt5.QtGui import QPainterPath, QPen
+from PyQt5.QtCore import QPointF, Qt
 import json
 
+sys.path.insert(1, sys.path[0] + r'\yolov5')
+sys.path.insert(2, sys.path[0] + r'\detectron')
+sys.path.insert(3, sys.path[0] + r'\detectron\projects\PointRend')
 
-sys.path.insert(1,sys.path[0]+r'\yolov5')
-sys.path.insert(2,sys.path[0]+r'\detectron')
-sys.path.insert(3,sys.path[0]+r'\detectron\projects\PointRend')
 
-
-#模型需要将以下三行取消注释
-#from yolov5.detect import yolo_detect
-#from detectron.detect import keypoint_detect
-#from detectron.projects.PointRend.detect import pointrend_detect
+from yolov5.detect import yolo_detect
+from detectron.detect import keypoint_detect
+from detectron.projects.PointRend.detect import pointrend_detect
 
 
 from ewindows import SaveE
 import copy
-from Inflation_search import calculate_length,convert_to_images,re_ploy
+from Inflation_search import calculate_length, convert_to_images, re_ploy
 
 
 class MyApp(QtWidgets.QMainWindow):
@@ -39,6 +39,8 @@ class MyApp(QtWidgets.QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self.line_start = None
+        self.current_line = None
         uic.loadUi('mainwindows.ui', self)
 
         # 初始化图片展示区域和控制按钮
@@ -54,6 +56,10 @@ class MyApp(QtWidgets.QMainWindow):
         self.label_image.installEventFilter(self)
 
         self.annotations = []  # 初始化批注列表
+        self.annotation_color = Qt.red  # 默认批注颜色
+        self.annotation_pen_width = 2  # 默认批注线条宽度
+        self.isDrawingLine = False
+
         self.isDragging = False  # 是否处于拖拽状态
         self.dragStartPos = None  # 拖拽开始位置
         self.labelStartPos = None  # QLabel的初始位置
@@ -67,13 +73,11 @@ class MyApp(QtWidgets.QMainWindow):
             self.labelStartPos = self.label_image.pos()  # 记录QLabel的初始位置
             self.scrollArea.setCursor(Qt.ClosedHandCursor)  # 设置鼠标为拖拽手势
 
-    def mouseMoveEvent(self, event):
-        """处理鼠标移动事件"""
-        if self.isDragging:
-            delta = event.pos() - self.dragStartPos
-            self.dragOffset = delta
-            new_pos = self.labelStartPos + delta
-            self.label_image.move(new_pos)
+        # 开始新的线条
+        if self.isDrawingLine:
+            self.line_start = self.label_image.mapFromGlobal(event.globalPos())
+            self.current_line = {'type': 'line', 'start': self.line_start, 'end': None}
+            self.annotations.append(self.current_line)
 
     def mouseMoveEvent(self, event):
         """处理鼠标移动事件"""
@@ -86,6 +90,24 @@ class MyApp(QtWidgets.QMainWindow):
             self.label_image.move(new_pos)
             print(f"Drag Delta: {delta}, New Position: {new_pos}")
             print(f"Label Position: {self.label_image.pos()}")
+
+        if self.isDrawingLine and self.current_line:
+            # 更新当前线条的结束点
+            self.current_line['end'] = self.label_image.mapFromGlobal(event.globalPos())
+            self.display_scaled_image()
+
+    def mouseReleaseEvent(self, event):
+        """处理鼠标释放事件"""
+        if event.button() == Qt.LeftButton:
+            self.isDragging = False
+            self.scrollArea.setCursor(Qt.ArrowCursor)
+
+            if self.isDrawingLine and self.current_line:
+                # 确保线条有结束点
+                if self.current_line['end']:
+                    self.current_line['end'] = self.label_image.mapFromGlobal(event.globalPos())
+                    self.display_scaled_image()
+                    self.current_line = None  # 结束当前线条绘制
 
     def adjust_viewport(self):
         """调整视图以确保图片完整显示"""
@@ -129,10 +151,18 @@ class MyApp(QtWidgets.QMainWindow):
             return True
         return super().eventFilter(source, event)
 
+    def start_drawing_line(self):
+        """开始绘制线条"""
+        self.isDrawingLine = True
+
     def init_image_viewer_and_controls(self):
         # 初始化控制图片的按钮和功能
         self.rotationAngle = 0
         self.scaleFactor = 1.0
+
+        # 确保按钮存在
+        if self.startDrawingLineButton is None:
+            print("Error: 'startDrawingLineButton' not found. Check the .ui file for the correct objectName.")
 
         # 查找控件
         self.label = self.findChild(QLabel, "label")
@@ -151,11 +181,17 @@ class MyApp(QtWidgets.QMainWindow):
         self.rotateClockwiseButton = self.findChild(QPushButton, "rotateClockwiseButton")
         self.rotateCounterclockwiseButton = self.findChild(QPushButton, "rotateCounterclockwiseButton")
 
+        self.startDrawingLineButton = self.findChild(QPushButton, "startDrawingLineButton")
         self.addAnnotationButton = self.findChild(QPushButton, "addAnnotationButton")
         self.saveAnnotationsButton = self.findChild(QPushButton, "saveAnnotationsButton")
         self.loadAnnotationsButton = self.findChild(QPushButton, "loadAnnotationsButton")
         self.clearAnnotationsButton = self.findChild(QPushButton, "clearAnnotationsButton")
         self.convertImageFormatButton = self.findChild(QPushButton, "convertImageFormatButton")
+
+        # 确保在使用这些按钮之前，它们已经被找到并且不是 None
+        if None in [self.addAnnotationButton, self.saveAnnotationsButton, self.loadAnnotationsButton,
+                    self.clearAnnotationsButton, self.convertImageFormatButton]:
+            print("One or more buttons not found. Please check the object names in the .ui file.")
         self.treeView = self.findChild(QTreeView, "treeView")
 
         # 新添加的两个按钮
@@ -177,7 +213,7 @@ class MyApp(QtWidgets.QMainWindow):
         # 将缩放后的图片设置到label中
         self.label.setPixmap(scaled_pixmap)
 
-        with open('exception.txt','w',encoding='utf-8') as f:
+        with open('exception.txt', 'w', encoding='utf-8') as f:
             f.write("异常：\n")
 
         # 文件浏览
@@ -201,6 +237,7 @@ class MyApp(QtWidgets.QMainWindow):
         # 获取所有驱动器的信息
         drives = [info.rootPath() for info in QStorageInfo.mountedVolumes()]
         self.drives = drives
+
     def updateButtonState(self):
         """更新按钮状态"""
         if not self.drives:
@@ -237,6 +274,7 @@ class MyApp(QtWidgets.QMainWindow):
         if not self.drives:
             QtWidgets.QMessageBox.warning(self, "警告", "没有可用的驱动器")
             return
+
     def init_signal_slots(self):
         """初始化信号槽连接"""
 
@@ -254,13 +292,20 @@ class MyApp(QtWidgets.QMainWindow):
         self.Import.triggered.connect(self.openImage)
         self.log.triggered.connect(self.show_log)
         self.log_clear.triggered.connect(self.clear_log)
-
-
+        self.addAnnotationButtons.triggered.connect(self.add_annotation)
+        self.saveAnnotationButtons.triggered.connect(self.save_annotations)
+        self.clearAnnotationButtons.triggered.connect(self.clear_annotations)
+        self.loadAnnotationButtons.triggered.connect(self.load_annotations)
+        self.convertImageFormatButtons.triggered.connect(self.convert_image_format)
 
     def update_image(self, index):
         new_imgName = self.filemodel.filePath(index)
-        if new_imgName and new_imgName.endswith((".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".JPG", ".JPEG", ".PNG", ".TIF", ".TIFF")):
+        if new_imgName and new_imgName.endswith(
+                (".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".JPG", ".JPEG", ".PNG", ".TIF", ".TIFF")):
             self.imgName = new_imgName
+            self.yolo_detect()
+            self.keypoint_detect()
+            self.pointrend_detect()
             self.pixmap = QPixmap(self.imgName)
             if self.pixmap.isNull():
                 raise ValueError("Failed to load image.")
@@ -268,9 +313,13 @@ class MyApp(QtWidgets.QMainWindow):
             self.add_log(f"加载了图片: {self.imgName}")
 
     def save_e(self):
-        self.ewindow1=SaveE()
+        self.ewindow1 = SaveE()
         self.ewindow1.show()
+        self.ewindow1.combo_box.currentIndexChanged.connect(self.add_elog)
 
+    def add_elog(self):
+        err = self.ewindow1.combo_box.currentText()
+        self.add_log(f"[{self.imgName}]:{err}")
 
     def show_log(self):
         # 发射信号给弹出界面
@@ -303,12 +352,10 @@ class MyApp(QtWidgets.QMainWindow):
                 self.add_log(f"加载了图片: {self.imgName}")
                 directory_path = os.path.dirname(os.path.abspath(self.imgName))
                 self.treeView.setRootIndex(self.filemodel.index(directory_path))  # 设置RootIndex
-                '''
                 self.yolo_detect()
                 self.keypoint_detect()
                 self.pointrend_detect()
-                self.length_detect()
-                '''
+
             else:
                 self.add_log(f"未选择图片")
         except Exception as e:
@@ -338,15 +385,31 @@ class MyApp(QtWidgets.QMainWindow):
 
             # 设置缩放后的QPixmap
             self.label_image.setPixmap(rotated_pixmap)
+
+            # 创建绘图对象
+            painter = QPainter(self.label_image.pixmap())
+
+            # 设置笔刷属性
+            painter.setPen(QPen(self.annotation_color, self.annotation_pen_width))
+
+            # 绘制批注
+            for ann in self.annotations:
+                if ann['type'] == 'circle':
+                    painter.drawEllipse(ann['x'], ann['y'], ann['radius'], ann['radius'])
+                elif ann['type'] == 'rectangle':
+                    painter.drawRect(QRect(ann['x'], ann['y'], ann['width'], ann['height']))
+                elif ann['type'] == 'line' and ann['start'] and ann['end']:
+                    painter.drawLine(ann['start'], ann['end'])
+
+            painter.end()
+
+            # 调整标签图像的大小以适应内容
             self.label_image.adjustSize()
 
-            # 计算新的中心点
+            # 重新计算并移动标签到居中位置
             new_center = self.label_image.rect().center()
-
-            # 计算偏移量并应用，使图片保持以原来位置的中心为放大缩小的中心
             delta = old_center - new_center
             self.label_image.move(self.label_image.pos() + delta)
-
         except Exception as e:
             print(f"Error displaying image: {e}")
             self.add_log(f"Error displaying image: {e}")
@@ -401,6 +464,7 @@ class MyApp(QtWidgets.QMainWindow):
         with open('log.txt', 'a') as file:
             file.write(formatted_message)
             file.close()
+
     def searchLog(self, text):
         """在日志区域中搜索并高亮显示文本"""
         # 获取整个日志内容
@@ -441,12 +505,13 @@ class MyApp(QtWidgets.QMainWindow):
     def pointrend_detect(self):
         predictions, t = pointrend_detect(self.imgName)
 
-    def length_detect(self):
+    """def length_detect(self):
         keypoint_info = self.keypoint_info
         keypoint_posinfo = {}
         for i, item in enumerate(keypoint_info):
             x, y, conf = item
             keypoint_posinfo[self.keypoint_names[i]] = [x, y]
+"""
 
     def show_yolo(self):
         if self.imgName:
@@ -478,6 +543,8 @@ class MyApp(QtWidgets.QMainWindow):
             self.label_image.setPixmap(scaled_pixmap)
             self.label_image.adjustSize()
 
+
+
     def add_annotation(self):
         """添加批注到图片"""
         try:
@@ -485,11 +552,34 @@ class MyApp(QtWidgets.QMainWindow):
                 QMessageBox.warning(self, "警告", "请先打开一张图片。")
                 return
 
-            # 假设批注为一个简单的列表，实际应用中可能会包含更多数据
-            annotation = {'type': 'circle', 'x': 100, 'y': 100, 'radius': 50}
-            self.annotations.append(annotation)
+            # 提供用户选择批注类型的界面
+            annotation_type, ok = QInputDialog.getItem(
+                self, "选择批注类型", "选择批注类型:", ["circle", "rectangle", "line"], 0, False
+            )
+            if not ok:
+                return
+
+            # 输入批注数据
+            if annotation_type == "circle":
+                x, ok = QInputDialog.getInt(self, "输入圆心X坐标", "X坐标:")
+                y, ok = QInputDialog.getInt(self, "输入圆心Y坐标", "Y坐标:")
+                radius, ok = QInputDialog.getInt(self, "输入半径", "半径:")
+                self.annotations.append({'type': 'circle', 'x': x, 'y': y, 'radius': radius})
+            elif annotation_type == "rectangle":
+                x, ok = QInputDialog.getInt(self, "输入矩形左上角X坐标", "X坐标:")
+                y, ok = QInputDialog.getInt(self, "输入矩形左上角Y坐标", "Y坐标:")
+                width, ok = QInputDialog.getInt(self, "输入矩形宽度", "宽度:")
+                height, ok = QInputDialog.getInt(self, "输入矩形高度", "高度:")
+                self.annotations.append({'type': 'rectangle', 'x': x, 'y': y, 'width': width, 'height': height})
+            elif annotation_type == "line":
+                x1, ok = QInputDialog.getInt(self, "输入线条起点X坐标", "起点X坐标:")
+                y1, ok = QInputDialog.getInt(self, "输入线条起点Y坐标", "起点Y坐标:")
+                x2, ok = QInputDialog.getInt(self, "输入线条终点X坐标", "终点X坐标:")
+                y2, ok = QInputDialog.getInt(self, "输入线条终点Y坐标", "终点Y坐标:")
+                self.annotations.append({'type': 'line', 'start': QPoint(x1, y1), 'end': QPoint(x2, y2)})
+
             self.display_scaled_image()
-            self.add_log(f"添加了批注: {annotation}")
+            self.add_log(f"添加了批注: {annotation_type}")
         except Exception as e:
             self.add_log(f"添加批注时出现错误: {e}")
             QMessageBox.critical(self, "错误", "添加批注时出现错误，请重试。")
@@ -548,3 +638,70 @@ class MyApp(QtWidgets.QMainWindow):
         except Exception as e:
             self.add_log(f"清除批注时出现错误: {e}")
             QMessageBox.critical(self, "错误", "清除批注时出现错误，请重试。")
+
+
+class ImageAnnotator(QGraphicsView):
+    def __init__(self):
+        super().__init__()
+        self.scene = QGraphicsScene(self)
+        self.setScene(self.scene)
+        self.setRenderHint(QPainter.Antialiasing)
+
+        self.annotations = []
+        self.current_annotation_type = None
+        self.start_point = None
+
+        self.setScene(self.scene)
+
+    def set_image(self, image):
+        # Assuming image is a QImage or QPixmap
+        self.scene.clear()
+        self.scene.addPixmap(image)
+
+    def start_annotation(self):
+        self.current_annotation_type, ok = QInputDialog.getItem(
+            self, "选择批注类型", "选择批注类型:", ["circle", "rectangle", "line", "curve"], 0, False
+        )
+        if not ok:
+            return
+
+        self.start_point = None
+        self.setMouseTracking(True)
+        self.viewport().setMouseTracking(True)
+
+    def mousePressEvent(self, event):
+        if self.current_annotation_type:
+            if self.start_point is None:
+                self.start_point = self.mapToScene(event.pos())
+            else:
+                end_point = self.mapToScene(event.pos())
+                self.add_annotation(self.start_point, end_point)
+                self.start_point = None
+                self.current_annotation_type = None
+                self.setMouseTracking(False)
+                self.viewport().setMouseTracking(False)
+
+    def add_annotation(self, start_point, end_point):
+        if self.current_annotation_type == 'circle':
+            radius = (start_point - end_point).manhattanLength() / 2
+            center = start_point + (end_point - start_point) / 2
+            item = QGraphicsEllipseItem(center.x() - radius, center.y() - radius, radius * 2, radius * 2)
+        elif self.current_annotation_type == 'rectangle':
+            rect = QRectF(start_point, end_point).normalized()
+            item = QGraphicsRectItem(rect)
+        elif self.current_annotation_type == 'line':
+            item = QGraphicsLineItem(QLineF(start_point, end_point))
+        elif self.current_annotation_type == 'curve':
+            path = QPainterPath(start_point)
+            path.cubicTo(start_point, end_point, end_point)
+            item = QGraphicsPathItem(path)
+        else:
+            return
+
+        item.setPen(QPen(Qt.red, 2))  # Set color and width of the annotation
+        self.scene.addItem(item)
+        self.annotations.append({'type': self.current_annotation_type, 'start': start_point, 'end': end_point})
+
+    def clear_annotations(self):
+        self.scene.clear()
+        self.annotations = []
