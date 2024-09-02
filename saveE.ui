@@ -26,7 +26,7 @@
          <x>0</x>
          <y>0</y>
          <width>666</width>
-         <height>590</height>
+         <height>592</height>
         </rect>
        </property>
        <widget class="QWidget" name="layoutWidget">
@@ -47,6 +47,11 @@ font: 75 8pt &quot;微软雅黑&quot;;
 color: rgb(182, 17, 2);
 border-radius: 15px 15px;</string>
            </property>
+           <item>
+            <property name="text">
+             <string>点击选择错误类型</string>
+            </property>
+           </item>
            <item>
             <property name="text">
              <string>外观破损</string>
@@ -190,7 +195,7 @@ border-radius: 15px 20px;</string>
      <x>0</x>
      <y>0</y>
      <width>686</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

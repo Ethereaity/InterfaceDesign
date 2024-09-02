@@ -22,13 +22,9 @@ sys.path.insert(1,sys.path[0]+r'\yolov5')
 sys.path.insert(2,sys.path[0]+r'\detectron')
 sys.path.insert(3,sys.path[0]+r'\detectron\projects\PointRend')
 
-
-#模型需要将以下三行取消注释
-#from yolov5.detect import yolo_detect
-#from detectron.detect import keypoint_detect
-#from detectron.projects.PointRend.detect import pointrend_detect
-
-
+from yolov5.detect import yolo_detect
+from detectron.detect import keypoint_detect
+from detectron.projects.PointRend.detect import pointrend_detect
 from ewindows import SaveE
 import copy
 from Inflation_search import calculate_length,convert_to_images,re_ploy
@@ -208,6 +204,7 @@ class MyApp(QtWidgets.QMainWindow):
         # 获取所有驱动器的信息
         drives = [info.rootPath() for info in QStorageInfo.mountedVolumes()]
         self.drives = drives
+
     def updateButtonState(self):
         """更新按钮状态"""
         if not self.drives:
@@ -274,6 +271,9 @@ class MyApp(QtWidgets.QMainWindow):
         new_imgName = self.filemodel.filePath(index)
         if new_imgName and new_imgName.endswith((".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".JPG", ".JPEG", ".PNG", ".TIF", ".TIFF")):
             self.imgName = new_imgName
+            self.yolo_detect()
+            self.keypoint_detect()
+            self.pointrend_detect()
             self.pixmap = QPixmap(self.imgName)
             if self.pixmap.isNull():
                 raise ValueError("Failed to load image.")
@@ -283,6 +283,11 @@ class MyApp(QtWidgets.QMainWindow):
     def save_e(self):
         self.ewindow1=SaveE()
         self.ewindow1.show()
+        self.ewindow1.combo_box.currentIndexChanged.connect(self.add_elog)
+
+    def add_elog(self):
+        err = self.ewindow1.combo_box.currentText()
+        self.add_log(f"[{self.imgName}]:{err}")
 
 
     def show_log(self):
@@ -316,12 +321,10 @@ class MyApp(QtWidgets.QMainWindow):
                 self.add_log(f"加载了图片: {self.imgName}")
                 directory_path = os.path.dirname(os.path.abspath(self.imgName))
                 self.treeView.setRootIndex(self.filemodel.index(directory_path))  # 设置RootIndex
-                '''
                 self.yolo_detect()
                 self.keypoint_detect()
                 self.pointrend_detect()
-                self.length_detect()
-                '''
+
             else:
                 self.add_log(f"未选择图片")
         except Exception as e:
@@ -466,13 +469,13 @@ class MyApp(QtWidgets.QMainWindow):
     def pointrend_detect(self):
         predictions, t = pointrend_detect(self.imgName)
 
-    def length_detect(self):
+    """def length_detect(self):
         keypoint_info = self.keypoint_info
         keypoint_posinfo = {}
         for i, item in enumerate(keypoint_info):
             x, y, conf = item
             keypoint_posinfo[self.keypoint_names[i]] = [x, y]
-
+"""
     def show_yolo(self):
         if self.imgName:
             self.pixmap = QPixmap('results/yolo_detect.jpg')
