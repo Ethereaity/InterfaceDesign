@@ -1,4 +1,3 @@
-
 import sys
 from PyQt5 import QtWidgets, QtCore
 import savelog  # 引入刚才编写的 savelog.py
