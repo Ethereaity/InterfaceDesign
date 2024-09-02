@@ -6,7 +6,7 @@ from PyQt5 import QtWidgets, uic,QtCore
 from PyQt5.QtGui import QPixmap, QTransform, QTextCharFormat, QTextCursor
 from PyQt5.QtWidgets import QMainWindow, QTextEdit, QFileDialog, QWidget, QApplication, QDialog, QLabel, QVBoxLayout, \
     QPushButton, QHBoxLayout, QComboBox, QLineEdit,QScrollArea,QMessageBox, QFileSystemModel,QTreeView
-from PyQt5.QtCore import Qt, QSize, QDateTime, QRegularExpression, QModelIndex
+from PyQt5.QtCore import Qt, QSize, QDateTime, QRegularExpression, QModelIndex,QPoint
 from PyQt5.QtGui import QPixmap, QTransform,QIcon
 from PyQt5.QtCore import pyqtSignal,QDir,QModelIndex
 import sys
@@ -54,6 +54,70 @@ class MyApp(QtWidgets.QMainWindow):
         self.label_image.installEventFilter(self)
 
         self.annotations = []  # 初始化批注列表
+        self.isDragging = False  # 是否处于拖拽状态
+        self.dragStartPos = None  # 拖拽开始位置
+        self.labelStartPos = None  # QLabel的初始位置
+        self.dragOffset = QtCore.QPoint(0, 0)  # 拖拽偏移量
+
+    def mousePressEvent(self, event):
+        """处理鼠标按下事件"""
+        if event.button() == Qt.LeftButton and self.label_image.underMouse():
+            self.isDragging = True
+            self.dragStartPos = event.pos()  # 记录鼠标按下时的位置
+            self.labelStartPos = self.label_image.pos()  # 记录QLabel的初始位置
+            self.scrollArea.setCursor(Qt.ClosedHandCursor)  # 设置鼠标为拖拽手势
+
+    def mouseMoveEvent(self, event):
+        """处理鼠标移动事件"""
+        if self.isDragging:
+            delta = event.pos() - self.dragStartPos
+            self.dragOffset = delta
+            new_pos = self.labelStartPos + delta
+            self.label_image.move(new_pos)
+
+    def mouseMoveEvent(self, event):
+        """处理鼠标移动事件"""
+        if self.isDragging:
+            if not self.dragStartPos or not self.labelStartPos:
+                return
+            delta = event.pos() - self.dragStartPos
+            self.dragOffset = delta
+            new_pos = self.labelStartPos + delta
+            self.label_image.move(new_pos)
+            print(f"Drag Delta: {delta}, New Position: {new_pos}")
+            print(f"Label Position: {self.label_image.pos()}")
+
+    def adjust_viewport(self):
+        """调整视图以确保图片完整显示"""
+        if not self.label_image.pixmap():
+            return
+
+        # 获取图片的矩形区域
+        pixmap_rect = self.label_image.pixmap().rect()
+        print(f"Pixmap Rect: {pixmap_rect}")
+
+        # 获取视图的矩形区域
+        viewport_rect = self.scrollArea.viewport().rect()
+        print(f"Viewport Rect: {viewport_rect}")
+
+        # 计算图片的显示区域
+        label_rect = self.label_image.rect()
+        print(f"Label Rect: {label_rect}")
+
+        # 计算需要调整的区域
+        if label_rect.width() > viewport_rect.width():
+            new_x = min(max(0, -self.label_image.x()), label_rect.width() - viewport_rect.width())
+        else:
+            new_x = (viewport_rect.width() - label_rect.width()) / 2
+
+        if label_rect.height() > viewport_rect.height():
+            new_y = min(max(0, -self.label_image.y()), label_rect.height() - viewport_rect.height())
+        else:
+            new_y = (viewport_rect.height() - label_rect.height()) / 2
+
+        # 移动图片到调整后的位置
+        self.label_image.move(new_x, new_y)
+        print(f"Adjusted Label Position: {self.label_image.pos()}")
 
     def eventFilter(self, source, event):
         """事件过滤器，用于处理鼠标滚轮事件"""
@@ -257,25 +321,32 @@ class MyApp(QtWidgets.QMainWindow):
             print("Error: No pixmap loaded.")
             return
         try:
-            # 确保 label_image 是有效的对象，并且大小合理
             if not self.label_image or self.label_image.size().width() == 0 or self.label_image.size().height() == 0:
                 print("Error: label_image is not properly initialized or has zero size.")
                 return
 
-            # 重新计算每次缩放的比例，确保缩放比例是基于初始图片大小的
+            # 计算当前的中心点
+            old_center = self.label_image.rect().center()
+
+            # 按比例缩放图片
+            scaled_pixmap = self.pixmap.scaled(self.label_image.size() * self.scaleFactor, Qt.KeepAspectRatio,
+                                               Qt.SmoothTransformation)
+
+            # 设置旋转变换
             transform = QTransform().rotate(self.rotationAngle)
-            rotated_pixmap = self.pixmap.transformed(transform, Qt.SmoothTransformation)
-            print(f"Pixmap transformed with rotation angle: {self.rotationAngle}")
+            rotated_pixmap = scaled_pixmap.transformed(transform, Qt.SmoothTransformation)
 
-            # 使用新的缩放比例调整图片大小
-            label_size = self.label_image.size()  # 获取 label 的当前大小
-            scaled_pixmap = rotated_pixmap.scaled(label_size * self.scaleFactor, Qt.KeepAspectRatio,
-                                                  Qt.SmoothTransformation)
-            print(f"Pixmap scaled with scale factor: {self.scaleFactor}")
-
-            self.label_image.setPixmap(scaled_pixmap)
+            # 设置缩放后的QPixmap
+            self.label_image.setPixmap(rotated_pixmap)
             self.label_image.adjustSize()
-            print(f"Image displayed with scale: {self.scaleFactor}, rotation: {self.rotationAngle}")
+
+            # 计算新的中心点
+            new_center = self.label_image.rect().center()
+
+            # 计算偏移量并应用，使图片保持以原来位置的中心为放大缩小的中心
+            delta = old_center - new_center
+            self.label_image.move(self.label_image.pos() + delta)
+
         except Exception as e:
             print(f"Error displaying image: {e}")
             self.add_log(f"Error displaying image: {e}")
