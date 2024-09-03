@@ -402,67 +402,8 @@ border-radius: 18px;</string>
         <item row="5" column="0">
          <layout class="QHBoxLayout" name="horizontalLayout">
           <property name="topMargin">
-           <number>5</number>
+           <number>0</number>
           </property>
-          <item>
-           <widget class="QLabel" name="label_2">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">font: 10pt &quot;华文楷体&quot;;</string>
-            </property>
-            <property name="text">
-             <string>换盘</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="newButton1">
-            <property name="styleSheet">
-             <string notr="true">         QPushButton {
-            font: 10pt &quot;华文楷体&quot;;
-            color: white;
-            background-color: #81D8D0;
-            border-radius: 15px;
-            padding: 10px 15px;
-          }
-          QPushButton:hover {
-            background-color: #B2DFE5;
-          }
-</string>
-            </property>
-            <property name="text">
-             <string>←</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="newButton2">
-            <property name="styleSheet">
-             <string notr="true">         QPushButton {
-            font: 10pt &quot;华文楷体&quot;;
-            color: white;
-            background-color: #81D8D0;
-            border-radius: 15px;
-            padding: 10px 15px;
-          }
-          QPushButton:hover {
-            background-color: #B2DFE5;
-          }
-</string>
-            </property>
-            <property name="text">
-             <string>→</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </item>
         <item row="8" column="0">

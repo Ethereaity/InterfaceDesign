@@ -23,11 +23,11 @@ sys.path.insert(1, sys.path[0] + r'\yolov5')
 sys.path.insert(2, sys.path[0] + r'\detectron')
 sys.path.insert(3, sys.path[0] + r'\detectron\projects\PointRend')
 
-'''
+
 from yolov5.detect import yolo_detect
 from detectron.detect import keypoint_detect
 from detectron.projects.PointRend.detect import pointrend_detect
-'''
+
 
 from ewindows import SaveE
 import copy
@@ -238,50 +238,12 @@ class MyApp(QtWidgets.QMainWindow):
         drives = [info.rootPath() for info in QStorageInfo.mountedVolumes()]
         self.drives = drives
 
-    def updateButtonState(self):
-        """更新按钮状态"""
-        if not self.drives:
-            self.newButton1.setEnabled(False)
-            self.newButton2.setEnabled(False)
-        else:
-            self.newButton1.setEnabled(len(self.drives) > 1)
-            self.newButton2.setEnabled(len(self.drives) > 1)
-
-    def handleNewButton1(self):
-        """按字母倒序切换盘符"""
-        if self.drives:
-            self.currentDriveIndex = (self.currentDriveIndex - 1) % len(self.drives)
-            self.showDrive()
-
-    def handleNewButton2(self):
-        """按字母顺序切换盘符"""
-        if self.drives:
-            self.currentDriveIndex = (self.currentDriveIndex + 1) % len(self.drives)
-            self.showDrive()
-
-    def showDrive(self):
-        """显示当前盘符的内容"""
-        currentDrive = self.drives[self.currentDriveIndex]
-        QtWidgets.QMessageBox.information(self, "Current Drive", f"Current Drive: {currentDrive}")
-
-        # 更新 treeView 的根索引为当前驱动器的路径
-        self.treeView.setRootIndex(self.filemodel.index(currentDrive))
-
-        # 更新按钮状态
-        self.updateButtonState()
-
-    def some_method(self):
-        if not self.drives:
-            QtWidgets.QMessageBox.warning(self, "警告", "没有可用的驱动器")
-            return
 
     def init_signal_slots(self):
         """初始化信号槽连接"""
 
         self.rotateClockwiseButton.clicked.connect(self.rotateClockwise)
         self.rotateCounterclockwiseButton.clicked.connect(self.rotateCounterclockwise)
-        self.newButton1.clicked.connect(self.handleNewButton1)
-        self.newButton2.clicked.connect(self.handleNewButton2)
 
         self.pushButton_3.clicked.connect(self.save_e)
         self.pushButton_4.clicked.connect(self.show_yolo)
