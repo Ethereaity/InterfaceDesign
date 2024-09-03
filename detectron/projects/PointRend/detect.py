@@ -97,7 +97,7 @@ def pointrend_detect(image_path):
     predictions, visualized_output = detectron_out.run_on_image(img)
     # out_img = visualized_output.get_image()[:, :, ::-1]
     visualized_output.save('results/pointrend_detect.jpg')
-    return predictions,time.time()-t_startta
+    return predictions,time.time()
 
 def fun(image_path):
     img = read_image(image_path, format="BGR")
