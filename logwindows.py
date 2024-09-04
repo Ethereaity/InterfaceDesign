@@ -4,13 +4,13 @@ from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QTextEdit, QPus
 from PyQt5.QtCore import Qt, QPropertyAnimation, QEasingCurve, QRegularExpression
 from PyQt5.QtGui import QTextCharFormat, QTextCursor
 
-class Log(QtWidgets.QMainWindow):
+
+class BaseLog(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('logwindows.ui', self)
         self.init_image_viewer_and_controls()
         self.init_signal_slots()
-        # 初始化动画
         self.init_animations()
 
     def show_log(self):
@@ -20,9 +20,10 @@ class Log(QtWidgets.QMainWindow):
             with open(filenames, 'r') as f:
                 log_data = f.read()
                 self.logArea.setText(log_data)
+            self.show()
         except FileNotFoundError:
             self.logArea.setText("日志文件未找到。")
-        self.show()
+            self.show()
 
     def init_image_viewer_and_controls(self):
         """初始化控件"""
@@ -37,7 +38,7 @@ class Log(QtWidgets.QMainWindow):
             self.searchBar.textChanged.connect(self.searchLog)
         if self.saveButton:
             self.saveButton.clicked.connect(lambda: self.animate_button(self.saveButton))
-            self.saveButton.clicked.connect(self.saveLog)  # 连接保存按钮
+            self.saveButton.clicked.connect(self.saveLog)
         if self.exportButton:
             self.exportButton.clicked.connect(lambda: self.animate_button(self.exportButton, self.exportLog))
 
@@ -47,32 +48,26 @@ class Log(QtWidgets.QMainWindow):
 
     def animate_button(self, button, callback=None):
         """按钮点击时的缩放动画"""
-        # 如果按钮正在执行动画，则取消该动画
         if button in self.animations:
             self.animations[button].stop()
 
-        # 放大动画
         enlarge_animation = QPropertyAnimation(button, b"size")
         enlarge_animation.setDuration(50)
         enlarge_animation.setStartValue(button.size())
         enlarge_animation.setEndValue(button.size() + QtCore.QSize(3, 3))
         enlarge_animation.setEasingCurve(QEasingCurve.OutBounce)
 
-        # 缩小动画
         shrink_animation = QPropertyAnimation(button, b"size")
         shrink_animation.setDuration(50)
         shrink_animation.setStartValue(button.size() + QtCore.QSize(3, 3))
         shrink_animation.setEndValue(button.size())
         shrink_animation.setEasingCurve(QEasingCurve.InBounce)
 
-        # 动画链
         enlarge_animation.finished.connect(lambda: shrink_animation.start())
 
-        # 缩小动画结束后调用回调函数
         if callback:
             shrink_animation.finished.connect(callback)
 
-        # 启动放大动画
         self.animations[button] = enlarge_animation
         enlarge_animation.start()
 
@@ -105,7 +100,8 @@ class Log(QtWidgets.QMainWindow):
     def exportLog(self):
         """导出日志内容到指定文件"""
         options = QFileDialog.Options()
-        filename, _ = QFileDialog.getSaveFileName(self, "导出日志", "", "Text Files (*.txt);;All Files (*)", options=options)
+        filename, _ = QFileDialog.getSaveFileName(self, "导出日志", "", "Text Files (*.txt);;All Files (*)",
+                                                  options=options)
         if filename:
             try:
                 with open(filename, 'w') as f:
@@ -114,10 +110,51 @@ class Log(QtWidgets.QMainWindow):
             except Exception as e:
                 print(f"导出日志时发生错误: {e}")
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    log_window = Log()
-    log_window.show()
-    sys.exit(app.exec_())
+
+class ErrorLog(BaseLog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Error Log")
+        self.logArea.setStyleSheet("background-color: lightpink;")
+
+    def saveLog(self):
+        """覆盖 BaseLog 类中的保存方法，指定默认日志级别为 ERROR"""
+        log_data = f"[ERROR] {self.logArea.toPlainText()}"
+        try:
+            with open('log.txt', 'w') as f:
+                f.write(log_data)
+        except Exception as e:
+            print(f"保存日志时发生错误: {e}")
+
+
+class WarningLog(BaseLog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Warning Log")
+        self.logArea.setStyleSheet("background-color: lightyellow;")
+
+    def saveLog(self):
+        """覆盖 BaseLog 类中的保存方法，指定默认日志级别为 WARNING"""
+        log_data = f"[WARNING] {self.logArea.toPlainText()}"
+        try:
+            with open('log.txt', 'w') as f:
+                f.write(log_data)
+        except Exception as e:
+            print(f"保存日志时发生错误: {e}")
+
+
+class InfoLog(BaseLog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Info Log")
+
+    def saveLog(self):
+        """覆盖 BaseLog 类中的保存方法，指定默认日志级别为 INFO"""
+        log_data = f"[INFO] {self.logArea.toPlainText()}"
+        try:
+            with open('log.txt', 'w') as f:
+                f.write(log_data)
+        except Exception as e:
+            print(f"保存日志时发生错误: {e}")
 
 
