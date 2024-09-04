@@ -1,9 +1,10 @@
 import sys
+import os
 from PyQt5 import QtWidgets, uic, QtCore, QtGui
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QTextEdit, QPushButton, QApplication
 from PyQt5.QtCore import Qt, QPropertyAnimation, QEasingCurve, QRegularExpression
 from PyQt5.QtGui import QTextCharFormat, QTextCursor
-
+from datetime import datetime
 
 class BaseLog(QtWidgets.QMainWindow):
     def __init__(self):
@@ -110,7 +111,6 @@ class BaseLog(QtWidgets.QMainWindow):
             except Exception as e:
                 print(f"导出日志时发生错误: {e}")
 
-
 class ErrorLog(BaseLog):
     def __init__(self):
         super().__init__()
@@ -125,7 +125,6 @@ class ErrorLog(BaseLog):
                 f.write(log_data)
         except Exception as e:
             print(f"保存日志时发生错误: {e}")
-
 
 class WarningLog(BaseLog):
     def __init__(self):
@@ -142,7 +141,6 @@ class WarningLog(BaseLog):
         except Exception as e:
             print(f"保存日志时发生错误: {e}")
 
-
 class InfoLog(BaseLog):
     def __init__(self):
         super().__init__()
@@ -156,5 +154,25 @@ class InfoLog(BaseLog):
                 f.write(log_data)
         except Exception as e:
             print(f"保存日志时发生错误: {e}")
+
+def save_log(log_content):
+    logs_folder = 'logs'
+
+    if not os.path.exists(logs_folder):
+        os.makedirs(logs_folder)
+
+    now = datetime.now()
+    timestamp = now.strftime('%Y-%m-%d_%H-%M-%S')
+
+    destination_file = os.path.join(logs_folder, f'{timestamp}.txt')
+
+    print(f"日志内容: {log_content}")
+
+    with open(destination_file, 'w') as f:
+        f.write(log_content)
+
+    print(f'日志已保存到 {destination_file}')
+
+
 
 

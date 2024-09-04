@@ -1,7 +1,6 @@
 import sys
 import logo
 import os
-import savelog
 from PyQt5 import QtWidgets, uic, QtCore
 from PyQt5.QtGui import QPixmap, QTransform, QTextCharFormat, QTextCursor
 from PyQt5.QtWidgets import QMainWindow, QTextEdit, QFileDialog, QWidget, QApplication, QDialog, QLabel, QVBoxLayout, \
@@ -18,6 +17,7 @@ from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphi
 from PyQt5.QtGui import QPainterPath, QPen
 from PyQt5.QtCore import QPointF, Qt
 import json
+import logwindows
 
 sys.path.insert(1, sys.path[0] + r'\yolov5')
 sys.path.insert(2, sys.path[0] + r'\detectron')
@@ -453,7 +453,7 @@ class MyApp(QtWidgets.QMainWindow):
         log_content = self.logArea.toPlainText()
         print("关闭事件被触发")
         try:
-            savelog.save_log(log_content)
+            save_log(log_content)  # 调用集成到 logwindows.py 的 save_log 函数
         except Exception as e:
             print(f"保存日志时出错: {e}")
         event.accept()
