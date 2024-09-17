@@ -465,7 +465,7 @@ border-radius: 18px;</string>
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>400</height>
+                <height>350</height>
                </size>
               </property>
               <property name="indentation">
