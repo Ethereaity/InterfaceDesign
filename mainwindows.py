@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphi
 from PyQt5.QtGui import QPainterPath, QPen
 from PyQt5.QtCore import QPointF, Qt
 import json
-import logwindows
+from logwindows import save_log
 
 sys.path.insert(1, sys.path[0] + r'\yolov5')
 sys.path.insert(2, sys.path[0] + r'\detectron')
@@ -448,15 +448,6 @@ class MyApp(QtWidgets.QMainWindow):
                 cursor = document.find(regex, cursor)
                 if not cursor.isNull():
                     cursor.mergeCharFormat(highlight_format)
-
-    def closeEvent(self, event):
-        log_content = self.logArea.toPlainText()
-        print("关闭事件被触发")
-        try:
-            save_log(log_content)  # 调用集成到 logwindows.py 的 save_log 函数
-        except Exception as e:
-            print(f"保存日志时出错: {e}")
-        event.accept()
 
     def yolo_detect(self):
         self.yolo_confs, self.yolo_components, self.yolo_time = yolo_detect(self.imgName)
